@@ -1,1139 +1,1436 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JUMBOOSHOP - ระบบชำระเงิน</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<!-- Supabase JS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-tailwind.config = {
-theme: {
-extend: {
-fontFamily: {
-sans: ['Prompt', 'sans-serif'],
-mono: ['"Share Tech Mono"', 'monospace'],
-},
-colors: {
-yellow: {
-100: '#FEF9C3',
-200: '#FEF08A',
-300: '#FDE047',
-400: '#FACC15',
-500: '#EAB308',
-},
-dark: '#1F2937'
-},
-boxShadow: {
-'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
-'brutal': '4px 4px 0px 0px rgba(31, 41, 55, 1)',
-}
-}
-}
-}
-</script>
-<style>
-body {
-background-color: #FEF9C3;
-overflow-x: hidden;
-position: relative;
-}
-.shape-1 { position: fixed; top: -50px; left: -50px; width: 200px; height: 200px; background-color: #FDE047; border-radius: 50%; opacity: 0.6; z-index: -1; }
-.shape-2 { position: fixed; bottom: 10%; right: -80px; width: 250px; height: 250px; background-color: #FEF08A; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; opacity: 0.7; z-index: -1; animation: morph 8s ease-in-out infinite alternate; }
-.shape-3 { position: fixed; top: 30%; left: 80%; width: 100px; height: 100px; background-color: #FACC15; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; opacity: 0.5; z-index: -1; }
-@media print {
-body { background-color: white !important; }
-.shape-1, .shape-2, .shape-3 { display: none !important; }
-#toast-container { display: none !important; }
-.receipt-machine-slot { display: none !important; }
-.receipt-container {
-box-shadow: none !important;
-border: none !important;
-margin: 0 !important;
-padding: 0 !important;
-}
-}
-@keyframes morph {
-0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
-100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
-}
-.view-section {
-animation: fadeIn 0.3s ease-in-out;
-}
-@keyframes fadeIn {
-from { opacity: 0; transform: translateY(10px); }
-to { opacity: 1; transform: translateY(0); }
-}
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: #FEF9C3; }
-::-webkit-scrollbar-thumb { background: #FACC15; border-radius: 10px; }
-.btn-primary {
-background-color: #FACC15;
-color: #1F2937;
-font-weight: 600;
-transition: all 0.2s;
-box-shadow: 2px 2px 0px 0px rgba(31, 41, 55, 1);
-border: 2px solid #1F2937;
-}
-.btn-primary:active {
-transform: translate(2px, 2px);
-box-shadow: 0px 0px 0px 0px rgba(31, 41, 55, 1);
-}
-.btn-secondary {
-background-color: #ffffff;
-color: #1F2937;
-font-weight: 600;
-transition: all 0.2s;
-border: 2px solid #1F2937;
-}
-.btn-secondary:active {
-background-color: #f3f4f6;
-}
-.card-style {
-background: white;
-border-radius: 1.5rem;
-border: 2px solid #1F2937;
-box-shadow: 4px 4px 0px 0px rgba(31, 41, 55, 1);
-}
-.receipt-container {
-background: #ffffff;
-position: relative;
-box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
-transform-origin: top center;
-animation: printReceipt 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
-}
-@keyframes printReceipt {
-0% {
-transform: scaleY(0);
-opacity: 0;
-max-height: 0px;
-padding-top: 0px;
-padding-bottom: 0px;
-}
-50% {
-opacity: 1;
-}
-100% {
-transform: scaleY(1);
-opacity: 1;
-max-height: 1200px;
-}
-}
-.receipt-jagged-edge {
-position: absolute;
-bottom: -10px;
-left: 0;
-right: 0;
-height: 10px;
-background: radial-gradient(circle, transparent, transparent 50%, #ffffff 50%, #ffffff 100%);
-background-size: 20px 20px;
-background-repeat: repeat-x;
-}
-#toast-container {
-position: fixed;
-top: 20px;
-right: 20px;
-z-index: 9999;
-display: flex;
-flex-direction: column;
-gap: 10px;
-}
-.toast {
-background-color: #1F2937;
-color: white;
-padding: 12px 20px;
-border-radius: 10px;
-box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-animation: slideIn 0.3s ease-out forwards;
-display: flex;
-align-items: center;
-gap: 10px;
-}
-@keyframes slideIn {
-from { transform: translateX(100%); opacity: 0; }
-to { transform: translateX(0); opacity: 1; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUMBOOSHOP - ระบบชำระเงิน</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Supabase JS SDK with Fallback CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        if (!window.supabase) {
+            document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');
+        }
+    </script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                        mono: ['"Share Tech Mono"', 'monospace'],
+                    },
+                    colors: {
+                        yellow: {
+                            100: '#FEF9C3',
+                            200: '#FEF08A',
+                            300: '#FDE047',
+                            400: '#FACC15',
+                            500: '#EAB308',
+                        },
+                        dark: '#1F2937'
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)',
+                        'brutal': '4px 4px 0px 0px rgba(31, 41, 55, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FEF9C3;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        .shape-1 { position: fixed; top: -50px; left: -50px; width: 200px; height: 200px; background-color: #FDE047; border-radius: 50%; opacity: 0.6; z-index: -1; }
+        .shape-2 { position: fixed; bottom: 10%; right: -80px; width: 250px; height: 250px; background-color: #FEF08A; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; opacity: 0.7; z-index: -1; animation: morph 8s ease-in-out infinite alternate; }
+        .shape-3 { position: fixed; top: 30%; left: 80%; width: 100px; height: 100px; background-color: #FACC15; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; opacity: 0.5; z-index: -1; }
+
+        @media print {
+            body { background-color: white !important; }
+            .shape-1, .shape-2, .shape-3 { display: none !important; }
+            #toast-container { display: none !important; }
+            .receipt-machine-slot { display: none !important; }
+            .receipt-container {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+        }
+
+        @keyframes morph {
+            0% { border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+
+        .view-section {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FEF9C3; }
+        ::-webkit-scrollbar-thumb { background: #FACC15; border-radius: 10px; }
+
+        .btn-primary {
+            background-color: #FACC15;
+            color: #1F2937;
+            font-weight: 600;
+            transition: all 0.2s;
+            box-shadow: 2px 2px 0px 0px rgba(31, 41, 55, 1);
+            border: 2px solid #1F2937;
+        }
+        .btn-primary:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px 0px rgba(31, 41, 55, 1);
+        }
+        .btn-secondary {
+            background-color: #ffffff;
+            color: #1F2937;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: 2px solid #1F2937;
+        }
+        .btn-secondary:active {
+            background-color: #f3f4f6;
+        }
+        
+        .card-style {
+            background: white;
+            border-radius: 1.5rem;
+            border: 2px solid #1F2937;
+            box-shadow: 4px 4px 0px 0px rgba(31, 41, 55, 1);
+        }
+
+        .receipt-container {
+            background: #ffffff;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1), 0 5px 15px rgba(0,0,0,0.07);
+            transform-origin: top center;
+            animation: printReceipt 0.8s cubic-bezier(0.1, 0.9, 0.2, 1) forwards;
+        }
+
+        @keyframes printReceipt {
+            0% {
+                transform: scaleY(0);
+                opacity: 0;
+                max-height: 0px;
+                padding-top: 0px;
+                padding-bottom: 0px;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: scaleY(1);
+                opacity: 1;
+                max-height: 1200px;
+            }
+        }
+
+        .receipt-jagged-edge {
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background: radial-gradient(circle, transparent, transparent 50%, #ffffff 50%, #ffffff 100%);
+            background-size: 20px 20px;
+            background-repeat: repeat-x;
+        }
+
+        #toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast {
+            background-color: #1F2937;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease-out forwards;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
 </head>
 <body class="text-dark min-h-screen flex flex-col antialiased">
-<div class="shape-1 print:hidden"></div>
-<div class="shape-2 print:hidden"></div>
-<div class="shape-3 print:hidden"></div>
-<div id="toast-container" class="print:hidden"></div>
-<header class="p-4 flex justify-between items-center sticky top-0 bg-yellow-100/90 backdrop-blur-sm z-40 border-b-2 border-dark/10 print:hidden">
-<div class="flex items-center gap-2 cursor-pointer" onclick="switchView('home-view')">
-<div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-dark">
-<i class="fa-solid fa-bolt text-dark text-xl"></i>
-</div>
-<h1 class="text-2xl font-bold tracking-tight">JUMBOOSHOP</h1>
-</div>
-<div class="flex items-center gap-3">
-<button id="btn-admin-login" onclick="checkAdminPassword()" class="flex items-center gap-2 text-sm font-bold bg-dark text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-transform hover:-translate-y-0.5 shadow-soft">
-<i class="fa-solid fa-lock text-yellow-400"></i> ผู้ดูแลระบบ
-</button>
-<div id="header-user-info" class="font-medium bg-white px-4 py-1 rounded-full border-2 border-dark hidden">
-</div>
-</div>
-</header>
-<main class="flex-1 w-full max-w-5xl mx-auto p-4 md:p-6 flex flex-col relative z-10">
-<!-- View 1: Home Selection (Customer Login Default) -->
-<div id="home-view" class="view-section w-full max-w-lg mx-auto flex-1 flex flex-col justify-center items-center">
-<div class="w-full card-style p-6 md:p-8">
-<div class="text-center mb-6">
-<div class="w-20 h-20 bg-yellow-300 rounded-full mx-auto flex items-center justify-center mb-4 border-2 border-dark">
-<i class="fa-solid fa-ticket text-3xl"></i>
-</div>
-<h2 class="text-2xl font-bold">ตรวจสอบยอดชำระ</h2>
-</div>
-<div class="bg-yellow-100 border-2 border-yellow-400 text-dark p-4 rounded-xl mb-6 text-sm font-bold flex items-center gap-3 shadow-[2px_2px_0px_0px_rgba(234,179,8,1)]">
-<div class="flex-shrink-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-dark">
-<i class="fa-solid fa-bell text-white"></i>
-</div>
-<p class="leading-tight">ใส่รหัสที่แอดมินส่งให้ทางแชทเพื่อรับรหัสในการตรวจเช็คคิวสินค้า</p>
-</div>
-<div class="space-y-4">
-<div>
-<label class="block text-sm font-semibold mb-2">รหัสคิว (Queue Code)</label>
-<input type="text" id="queue-input" class="w-full p-4 rounded-xl border-2 border-dark bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-yellow-400/50 text-center text-2xl font-bold uppercase" placeholder="เช่น QR0001-J" autocomplete="off">
-</div>
-<button onclick="loginCustomer()" class="w-full btn-primary p-4 rounded-xl text-lg mt-4">
-ตรวจสอบข้อมูล <i class="fa-solid fa-magnifying-glass ml-2"></i>
-</button>
-</div>
-</div>
-<div class="mt-8 flex flex-col items-center view-section">
-<p class="text-sm font-bold text-gray-600 mb-3">พบปัญหาหรือมีข้อสงสัย? ติดต่อเรา</p>
-<div class="flex gap-4">
-<a href="https://line.me/R/ti/p/@655ayoko" target="_blank" class="px-6 h-12 bg-[#00B900] text-white rounded-xl flex items-center justify-center gap-2 text-lg font-bold border-2 border-dark shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(31,41,55,1)] transition-all">
-<i class="fa-brands fa-line text-2xl"></i> @655ayoko
-</a>
-</div>
-</div>
-</div>
-<!-- View 3: Customer Dashboard -->
-<div id="customer-dashboard-view" class="view-section hidden w-full max-w-lg mx-auto flex-1">
-<button onclick="logout()" class="mb-4 text-gray-700 hover:text-dark flex items-center gap-2 font-bold print:hidden bg-white px-4 py-2 rounded-full border-2 border-gray-300 shadow-sm transition-all hover:bg-gray-100">
-<i class="fa-solid fa-arrow-left"></i> กลับหน้าหลัก
-</button>
-<!-- State A: Pending Payment -->
-<div id="cust-state-pending" class="hidden">
-<div id="cust-reject-alert" class="hidden bg-red-100 border-2 border-red-500 text-red-700 p-4 rounded-xl mb-6 font-bold flex items-center gap-3 shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] view-section">
-<div class="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center border-2 border-dark">
-<i class="fa-solid fa-triangle-exclamation text-white"></i>
-</div>
-<p>สลิปไม่ถูกต้องโปรดลองใหม่</p>
-</div>
-<div class="card-style p-6 mb-6">
-<div class="flex justify-between items-start border-b-2 border-dashed border-gray-300 pb-4 mb-4">
-<div>
-<h3 class="text-xl font-bold">รายการสั่งซื้อ</h3>
-<p class="text-gray-500 text-sm">รหัสคิว: <span id="disp-queue-code" class="font-bold text-dark"></span></p>
-</div>
-<div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold border border-yellow-300">
-รอชำระเงิน
-</div>
-</div>
-<div id="cust-items-list" class="space-y-3 mb-4 min-h-[100px]">
-</div>
-<div class="bg-gray-50 p-4 rounded-xl border-2 border-dark/10 space-y-2">
-<div class="flex justify-between text-gray-600">
-<span>ยอดรวม (Subtotal)</span>
-<span id="cust-subtotal" class="font-medium">0 ฿</span>
-</div>
-<div class="flex justify-between text-red-500">
-<span id="cust-discount-label">ส่วนลด (Discount)</span>
-<span id="cust-discount" class="font-medium">-0 ฿</span>
-</div>
-<div class="border-t border-gray-300 pt-2 flex justify-between items-end mt-2">
-<span class="font-bold text-lg">ยอดที่ต้องชำระสุทธิ</span>
-<span id="cust-total" class="text-3xl font-bold text-yellow-600">0 ฿</span>
-</div>
-</div>
-</div>
-<div class="card-style p-6 bg-yellow-50">
-<h3 class="font-bold text-lg mb-4 text-center">ช่องทางการชำระเงิน</h3>
-<div class="bg-white p-4 rounded-xl border border-gray-200 text-center mb-4 shadow-sm">
-<p class="font-bold text-dark">บัญชีธนาคาร</p>
-<p class="text-2xl font-mono my-2 tracking-wider font-bold text-yellow-600">145-8-30446-3</p>
-<p class="text-md font-bold text-gray-700">ชื่อบัญชี: นาง อา ดาร์</p>
-</div>
-<div class="space-y-3">
-<label class="block text-sm font-semibold">แนบหลักฐานการโอนเงิน (สลิป)</label>
-<div class="relative border-2 border-dashed border-gray-400 rounded-xl p-6 text-center hover:bg-yellow-100/50 cursor-pointer transition-colors" id="drop-zone">
-<input type="file" id="slip-upload" accept="image/png, image/jpeg, image/jpg, image/webp" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewSlip(event)">
-<div id="upload-placeholder">
-<i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-2"></i>
-<p class="text-gray-500 font-medium">คลิกหรือลากไฟล์สลิปมาที่นี่ (สูงสุด 5MB)</p>
-</div>
-<img id="slip-preview" class="hidden max-h-48 mx-auto rounded-lg shadow-sm">
-</div>
-<button onclick="submitSlip()" id="btn-submit-slip" class="w-full btn-primary p-4 rounded-xl text-lg mt-2 opacity-50 cursor-not-allowed" disabled>
-แจ้งโอนเงิน
-</button>
-</div>
-</div>
-</div>
-<!-- State B: Reviewing -->
-<div id="cust-state-reviewing" class="hidden text-center card-style p-10 flex flex-col items-center justify-center gap-6 mt-10">
-<div class="w-24 h-24 relative">
-<div class="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-20"></div>
-<div class="absolute inset-0 bg-yellow-300 rounded-full flex items-center justify-center border-4 border-dark">
-<i class="fa-solid fa-hourglass-half text-4xl text-dark animate-pulse"></i>
-</div>
-</div>
-<div>
-<h2 class="text-2xl font-bold mb-2">โปรดรอตรวจสอบ</h2>
-<p class="text-gray-600">เราได้รับสลิปของคุณแล้ว
-กำลังรอผู้ดูแลระบบยืนยันการชำระเงิน</p>
-</div>
-<div class="flex gap-3 mt-4 print:hidden">
-<button onclick="refreshCustomerStatus()" class="btn-secondary px-6 py-2 rounded-full text-sm">
-<i class="fa-solid fa-rotate-right mr-1"></i> รีเฟรชสถานะ
-</button>
-<button onclick="logout()" class="btn-secondary px-6 py-2 rounded-full text-sm bg-gray-100 hover:bg-gray-200">
-<i class="fa-solid fa-arrow-left mr-1"></i> ตรวจสอบคิวอื่น
-</button>
-</div>
-</div>
-<!-- State C: Approved Receipt -->
-<div id="cust-state-receipt" class="hidden flex flex-col items-center">
-<div class="receipt-machine-slot w-48 h-5 bg-gradient-to-b from-gray-300 to-gray-400 rounded-t-lg border-2 border-dark/30 shadow-inner mb-[-2px] relative z-10 flex items-center justify-center">
-<div class="w-32 h-1.5 bg-dark/80 rounded-full"></div>
-</div>
-<div class="receipt-container w-full max-w-sm px-6 pt-8 pb-12 rounded-b-lg border-x-2 border-b-2 border-dark/20 text-dark relative overflow-hidden">
-<div class="text-center pb-4 mb-4 border-b-2 border-dashed border-gray-300">
-<h2 class="text-2xl font-bold tracking-widest uppercase">JUMBOOSHOP</h2>
-<p class="text-xs text-gray-500 font-mono mt-1">RECEIPT / ใบเสร็จรับเงิน</p>
-<p id="receipt-date" class="text-xs text-gray-500 font-mono mt-0.5"></p>
-</div>
-<div class="bg-gray-100 border border-gray-300 rounded-lg p-3 text-center mb-6">
-<p class="text-xs text-gray-500 mb-0.5 font-medium">รหัสเช็คสถานะงาน</p>
-<p id="receipt-work-code" class="text-2xl font-mono font-bold tracking-widest text-yellow-600">JB0001-Q</p>
-<p class="text-[11px] text-gray-500 mt-1">รหัสคิวลูกค้า: <span id="receipt-queue" class="font-bold text-dark"></span></p>
-</div>
-<div class="mb-6">
-<div class="flex justify-between text-xs font-bold text-gray-500 uppercase border-b border-gray-300 pb-1 mb-2">
-<span>Description</span>
-<span>Price</span>
-</div>
-<div id="receipt-items" class="space-y-2 text-sm">
-</div>
-</div>
-<div class="border-t border-dashed border-gray-300 pt-4 space-y-2 text-sm mb-6 font-mono">
-<div class="flex justify-between text-gray-600">
-<span>Subtotal</span>
-<span id="receipt-subtotal"></span>
-</div>
-<div class="flex justify-between text-red-500">
-<span id="receipt-discount-label">Discount</span>
-<span id="receipt-discount"></span>
-</div>
-<div class="border-t border-gray-300 pt-2 flex justify-between items-center font-bold text-base text-dark">
-<span>Total</span>
-<span id="receipt-total" class="text-lg"></span>
-</div>
-</div>
-<div id="receipt-promo-box" class="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-center mb-6">
-<p class="text-xs font-bold text-yellow-800 mb-1"><i class="fa-solid fa-gift mr-1"></i> โค้ดส่วนลดครั้งถัดไป</p>
-<p id="receipt-promo-code" class="text-xl font-mono font-bold text-dark bg-white py-1.5 rounded border border-dashed border-yellow-400 mb-2"></p>
-<div class="text-[11px] text-left bg-white/80 p-2 rounded border border-yellow-200 font-sans">
-<p class="font-bold text-dark mb-0.5">หมายเหตุวิธีใช้ โค้ดส่วนลดครั้งถัดไป :</p>
-<p class="text-gray-600 leading-tight">นำโค้ดที่ได้รับไปใส่ในช่องสั่งซื้อทางเว็บแรก <span class="text-red-500 font-bold italic">โค้ดนี้เป็นโค้ดลับมีเพียงลูกค้าที่มีสิทธ์เท่านั้นที่สามารถใช้ได้</span></p>
-</div>
-</div>
-<div class="receipt-jagged-edge"></div>
-</div>
-<div class="flex flex-col gap-3 mt-8 w-full max-w-sm print:hidden">
-<button onclick="window.print()" class="w-full btn-secondary p-3 rounded-xl shadow-sm">
-<i class="fa-solid fa-print mr-2"></i> พิมพ์ / บันทึกใบเสร็จ
-</button>
-<button onclick="logout()" class="w-full bg-gray-100 hover:bg-gray-200 text-dark border-2 border-dark font-bold p-3 rounded-xl transition-colors">
-<i class="fa-solid fa-arrow-left mr-2"></i> กลับหน้าหลัก
-</button>
-</div>
-</div>
-</div>
-<!-- View 4: Admin Dashboard -->
-<div id="admin-view" class="view-section hidden w-full mx-auto pb-10">
-<div class="flex justify-between items-center mb-6">
-<h2 class="text-2xl font-bold"><i class="fa-solid fa-shield-halved text-yellow-500 mr-2"></i> ระบบผู้ดูแล</h2>
-<div class="flex gap-2">
-<button onclick="openAdminModal()" class="btn-primary px-4 py-2 rounded-lg text-sm">
-<i class="fa-solid fa-plus mr-1"></i> สร้างคิวใหม่
-</button>
-<button onclick="logoutAdmin()" class="bg-white hover:bg-gray-100 px-4 py-2 rounded-lg text-sm border-2 border-dark font-bold transition-colors shadow-sm">
-<i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> กลับหน้าหลัก
-</button>
-</div>
-</div>
-<div class="card-style p-4 mb-6 flex gap-4 bg-white/80 backdrop-blur">
-<div class="relative flex-1">
-<i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-<input type="text" id="admin-search" onkeyup="renderAdminList()" class="w-full pl-10 pr-4 py-2 rounded-lg border-2 border-gray-300 focus:border-dark focus:outline-none" placeholder="ค้นหารหัสคิว...">
-</div>
-<select id="admin-filter" onchange="renderAdminList()" class="border-2 border-gray-300 rounded-lg px-4 py-2 focus:border-dark focus:outline-none bg-white font-medium">
-<option value="all">สถานะทั้งหมด</option>
-<option value="pending">รอชำระเงิน</option>
-<option value="reviewing">รอตรวจสอบ (มีสลิป)</option>
-<option value="approved">เสร็จสิ้น (ออกใบเสร็จ)</option>
-</select>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="admin-list">
-</div>
-</div>
-</main>
-<!-- Admin Modal: Edit/Create Bill -->
-<div id="admin-modal" class="fixed inset-0 bg-dark/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
-<div class="card-style w-full max-w-lg max-h-[90vh] overflow-y-auto relative flex flex-col bg-white">
-<div class="sticky top-0 bg-white p-4 border-b-2 border-dark flex justify-between items-center rounded-t-[1.3rem] z-10">
-<h3 id="modal-title" class="text-xl font-bold">จัดการคิว</h3>
-<button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors">
-<i class="fa-solid fa-times"></i>
-</button>
-</div>
-<div class="p-6 space-y-6">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-<div>
-<label class="block text-sm font-semibold mb-1">รหัสคิว</label>
-<input type="text" id="modal-queue" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark uppercase font-bold" placeholder="เช่น QR0001-J">
-</div>
-<div>
-<label class="block text-sm font-semibold mb-1">รหัสเช็คสถานะงาน</label>
-<input type="text" id="modal-work-code" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark uppercase font-bold text-yellow-600" placeholder="เช่น JB0001-Q">
-</div>
-</div>
-<div class="border-t-2 border-gray-100 pt-4">
-<label class="block text-sm font-semibold mb-2">รายการสินค้า</label>
-<div class="flex gap-2 mb-4">
-<input type="text" id="add-item-name" class="flex-1 p-2 border-2 border-gray-300 rounded-lg focus:border-dark text-sm" placeholder="ชื่อสินค้า">
-<input type="number" id="add-item-price" class="w-24 p-2 border-2 border-gray-300 rounded-lg focus:border-dark text-sm" placeholder="ราคา">
-<button type="button" onclick="addModalItem()" class="bg-dark text-white px-3 rounded-lg hover:bg-gray-800 transition-colors">
-<i class="fa-solid fa-plus"></i>
-</button>
-</div>
-<div id="modal-items-list" class="space-y-2 bg-gray-50 p-3 rounded-lg min-h-[50px] border border-gray-200">
-</div>
-</div>
-<div class="grid grid-cols-2 gap-4">
-<div class="col-span-2">
-<label class="block text-sm font-semibold mb-1">ชื่อส่วนลด (ถ้ามี)</label>
-<input type="text" id="modal-discount-name" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark" placeholder="เช่น โปรลูกค้าใหม่, ลด 10%">
-</div>
-<div>
-<label class="block text-sm font-semibold mb-1 flex justify-between items-center">
-<span>ส่วนลด</span>
-<select id="modal-discount-type" onchange="calculateModalTotal()" class="text-xs border-2 border-gray-300 rounded-md px-1 py-0.5 outline-none focus:border-dark font-medium bg-white">
-<option value="amount">บาท (฿)</option>
-<option value="percent">เปอร์เซ็นต์ (%)</option>
-</select>
-</label>
-<input type="number" id="modal-discount" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark" value="0" oninput="calculateModalTotal()">
-</div>
-<div>
-<label class="block text-sm font-semibold mb-1 text-gray-500">ยอดรวมสุทธิ</label>
-<div id="modal-total-display" class="w-full p-2 bg-gray-100 border-2 border-gray-200 rounded-lg font-bold text-xl text-right">0 ฿</div>
-</div>
-</div>
-<div class="border-t-2 border-gray-100 pt-4">
-<label class="block text-sm font-semibold mb-1"><i class="fa-solid fa-gift text-yellow-500"></i> โค้ดส่วนลดครั้งถัดไป</label>
-<input type="text" id="modal-promo" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark uppercase" placeholder="ไม่บังคับ">
-</div>
-</div>
-<div class="p-4 border-t-2 border-dark bg-gray-50 rounded-b-[1.3rem] flex justify-end gap-3">
-<button onclick="closeAdminModal()" class="px-4 py-2 border-2 border-dark rounded-lg font-medium bg-white hover:bg-gray-100">ยกเลิก</button>
-<button onclick="saveAdminData()" class="btn-primary px-6 py-2 rounded-lg">บันทึกข้อมูล</button>
-</div>
-</div>
-</div>
-<!-- Admin Modal: Review Slip -->
-<div id="slip-modal" class="fixed inset-0 bg-dark/80 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
-<div class="card-style w-full max-w-md bg-white flex flex-col overflow-hidden">
-<div class="p-4 border-b-2 border-dark flex justify-between items-center bg-yellow-300">
-<h3 class="font-bold text-lg">ตรวจสอบการชำระเงิน</h3>
-<button onclick="closeSlipModal()" class="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center hover:bg-white transition-colors">
-<i class="fa-solid fa-times text-dark"></i>
-</button>
-</div>
-<div class="p-4 flex flex-col items-center bg-gray-100">
-<p class="font-bold mb-2">รหัสคิว: <span id="slip-modal-queue" class="text-xl text-yellow-600"></span></p>
-<p class="text-sm mb-4">ยอดที่ต้องโอน: <span id="slip-modal-amount" class="font-bold text-lg"></span> ฿</p>
-<div class="w-full max-h-[50vh] overflow-hidden rounded-lg border-2 border-gray-300 bg-white flex justify-center">
-<img id="slip-modal-img" src="" alt="Slip" class="object-contain max-w-full max-h-full cursor-zoom-in" onclick="this.classList.toggle('scale-150')">
-</div>
-</div>
-<div class="p-4 grid grid-cols-2 gap-3 bg-white">
-<button onclick="rejectSlip()" class="w-full py-3 border-2 border-red-500 text-red-500 rounded-xl font-bold hover:bg-red-50 transition-colors">
-<i class="fa-solid fa-xmark mr-1"></i> ปฏิเสธ (ให้ส่งใหม่)
-</button>
-<button onclick="approvePayment()" class="w-full btn-primary py-3 rounded-xl">
-<i class="fa-solid fa-check mr-1"></i> ยืนยันยอดเงิน
-</button>
-</div>
-</div>
-</div>
-<!-- Admin Login Modal -->
-<div id="admin-login-modal" class="fixed inset-0 bg-dark/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
-<div class="card-style w-full max-w-sm bg-white overflow-hidden transform transition-all">
-<div class="p-4 border-b-2 border-dark bg-yellow-300 flex justify-between items-center">
-<h3 class="font-bold text-lg"><i class="fa-solid fa-lock mr-2"></i>เข้าสู่ระบบผู้ดูแล</h3>
-<button onclick="closeAdminLogin()" class="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center hover:bg-white transition-colors">
-<i class="fa-solid fa-times text-dark"></i>
-</button>
-</div>
-<div class="p-6 space-y-4">
-<div id="admin-login-form-div" class="space-y-4">
-<div>
-<label class="block text-sm font-semibold mb-2">อีเมลแอดมิน</label>
-<input type="email" id="admin-login-email" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-sm" placeholder="admin@email.com">
-</div>
-<div>
-<label class="block text-sm font-semibold mb-2">รหัสผ่าน</label>
-<input type="password" id="admin-login-password" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-sm" placeholder="••••••••">
-</div>
-<button onclick="submitAdminLogin()" class="w-full btn-primary p-3 rounded-xl font-bold">
-เข้าสู่ระบบ
-</button>
-</div>
-<button onclick="closeAdminLogin()" class="w-full bg-gray-100 hover:bg-gray-200 text-dark p-3 rounded-xl font-bold border-2 border-gray-300 transition-colors mt-2">
-<i class="fa-solid fa-arrow-left mr-2"></i> ยกเลิก / กลับ
-</button>
-</div>
-</div>
-</div>
-<!-- Confirm Modal -->
-<div id="confirm-modal" class="fixed inset-0 bg-dark/60 backdrop-blur-sm z-[60] hidden flex justify-center items-center p-4">
-<div class="card-style w-full max-w-sm bg-white p-6 text-center">
-<div class="w-16 h-16 bg-red-100 rounded-full mx-auto flex items-center justify-center mb-4 border-2 border-red-500">
-<i class="fa-solid fa-exclamation text-3xl text-red-500"></i>
-</div>
-<h3 id="confirm-title" class="font-bold text-xl mb-2">ยืนยันการดำเนินการ</h3>
-<p id="confirm-text" class="text-gray-600 mb-6 text-sm">คุณแน่ใจหรือไม่?</p>
-<div class="flex gap-3">
-<button onclick="closeConfirmModal()" class="flex-1 py-2 rounded-xl border-2 border-dark font-bold hover:bg-gray-100">ยกเลิก</button>
-<button onclick="executeConfirm()" class="flex-1 py-2 rounded-xl bg-red-500 text-white font-bold border-2 border-dark hover:bg-red-600">ยืนยัน</button>
-</div>
-</div>
-</div>
-<script>
-const SUPABASE_URL = 'https://vipwsmfgxgaetbnfrwxl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpcHdzbWZneGdhZXRibmZyd3hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjY2MTMsImV4cCI6MjEwNTE0MjYxM30.KOG5z78HPLCvxBLr8NaNseIi_eJghcsKwOZs6fqmrXA';
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-let currentRole = null;
-let currentQueue = null;
-let currentOrderId = null;
-let tempModalItems = [];
-let currentEditingOrderId = null;
-let currentReviewingOrderId = null;
-// ฟังก์ชันป้องกัน XSS Injection
-function escapeHtml(str) {
-if (!str && str !== 0) return '';
-return String(str)
-.replace(/&/g, '&')
-.replace(/</g, '<')
-.replace(/>/g, '>')
-.replace(/"/g, '"')
-.replace(/'/g, ''');
-}
-function showToast(message, type = 'success') {
-const container = document.getElementById('toast-container');
-const toast = document.createElement('div');
-toast.className = 'toast';
-const icon = type === 'success' ? '<i class="fa-solid fa-circle-check text-green-400 text-xl"></i>' :
-type === 'error' ? '<i class="fa-solid fa-circle-exclamation text-red-400 text-xl"></i>' :
-'<i class="fa-solid fa-circle-info text-blue-400 text-xl"></i>';
-toast.innerHTML = ⁠${icon} <span class="font-medium">${escapeHtml(message)}</span>⁠;
-container.appendChild(toast);
-setTimeout(() => {
-toast.style.animation = 'slideIn 0.3s ease-out reverse forwards';
-setTimeout(() => toast.remove(), 300);
-}, 3000);
-}
-function formatMoney(amount) {
-return parseFloat(amount || 0).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-}
-function calculateDiscountAmount(items, discount, discountType = 'amount') {
-const subtotal = items.reduce((sum, item) => sum + parseFloat(item.price), 0);
-if (discountType === 'percent') {
-return (subtotal * parseFloat(discount || 0)) / 100;
-}
-return parseFloat(discount || 0);
-}
-function calculateTotal(items, discount, discountType = 'amount') {
-const subtotal = items.reduce((sum, item) => sum + parseFloat(item.price), 0);
-const discountAmount = calculateDiscountAmount(items, discount, discountType);
-return Math.max(0, subtotal - discountAmount);
-}
-async function generateNextWorkCode() {
-try {
-const { data, error } = await supabaseClient.from('orders').select('work_code');
-if (error) throw error;
-let maxNum = 0;
-(data || []).forEach(row => {
-const match = (row.work_code || '').match(/^JB(\d{4})-Q$/);
-if (match) {
-const num = parseInt(match[1], 10);
-if (num > maxNum) maxNum = num;
-}
-});
-return ⁠JB${(maxNum + 1).toString().padStart(4, '0')}-Q⁠;
-} catch (e) {
-return 'JB0001-Q';
-}
-}
-async function generateNextQueueCode() {
-try {
-const { data, error } = await supabaseClient.from('orders').select('queue_code');
-if (error) throw error;
-let maxNum = 0;
-(data || []).forEach(row => {
-const match = (row.queue_code || '').match(/^QR(\d{4})-J$/);
-if (match) {
-const num = parseInt(match[1], 10);
-if (num > maxNum) maxNum = num;
-}
-});
-return ⁠QR${(maxNum + 1).toString().padStart(4, '0')}-J⁠;
-} catch (e) {
-return 'QR0001-J';
-}
-}
-function switchView(viewId) {
-document.getElementById('home-view').classList.add('hidden');
-document.getElementById('customer-dashboard-view').classList.add('hidden');
-document.getElementById('admin-view').classList.add('hidden');
-document.getElementById(viewId).classList.remove('hidden');
-const headerInfo = document.getElementById('header-user-info');
-const adminBtn = document.getElementById('btn-admin-login');
-if (viewId === 'home-view') {
-currentRole = null;
-headerInfo.classList.add('hidden');
-if (adminBtn) adminBtn.classList.remove('hidden');
-} else if (viewId === 'admin-view') {
-if (adminBtn) adminBtn.classList.add('hidden');
-} else {
-if (adminBtn) adminBtn.classList.add('hidden');
-}
-}
-async function loginCustomer(overrideQueue = null) {
-const input = (overrideQueue || document.getElementById('queue-input').value).trim().toUpperCase();
-if (!input) {
-showToast('กรุณากรอกรหัสคิว', 'error');
-return;
-}
-try {
-const { data, error } = await supabaseClient
-.from('orders')
-.select(', order_items()')
-.eq('queue_code', input)
-.single();
-if (error || !data) {
-showToast('ไม่พบรหัสคิวนี้ในระบบ', 'error');
-return;
-}
-currentRole = 'customer';
-currentQueue = input;
-currentOrderId = data.id;
-document.getElementById('queue-input').value = '';
-const headerInfo = document.getElementById('header-user-info');
-headerInfo.innerHTML = ⁠<i class="fa-solid fa-user text-yellow-500 mr-2"></i> คิว: ${escapeHtml(currentQueue)}⁠;
-headerInfo.classList.remove('hidden');
-renderCustomerDashboard(data);
-switchView('customer-dashboard-view');
-} catch (err) {
-showToast('เกิดข้อผิดพลาดในการตรวจสอบคิว', 'error');
-}
-}
-function refreshCustomerStatus() {
-if (currentQueue) {
-loginCustomer(currentQueue);
-}
-}
-function logout() {
-currentQueue = null;
-currentOrderId = null;
-switchView('home-view');
-}
-function renderCustomerDashboard(orderData) {
-if (!orderData) return;
-document.getElementById('cust-state-pending').classList.add('hidden');
-document.getElementById('cust-state-reviewing').classList.add('hidden');
-document.getElementById('cust-state-receipt').classList.add('hidden');
-const items = orderData.order_items || [];
-if (orderData.status === 'pending') {
-document.getElementById('cust-state-pending').classList.remove('hidden');
-if (orderData.slip_rejected) {
-document.getElementById('cust-reject-alert').classList.remove('hidden');
-} else {
-document.getElementById('cust-reject-alert').classList.add('hidden');
-}
-document.getElementById('disp-queue-code').innerText = orderData.queue_code;
-const itemsList = document.getElementById('cust-items-list');
-itemsList.innerHTML = '';
-let subtotal = 0;
-items.forEach(item => {
-subtotal += parseFloat(item.price);
-itemsList.innerHTML += ⁠<div class="flex justify-between items-center text-sm"> <span class="text-gray-700"><i class="fa-solid fa-caret-right text-yellow-400 mr-2"></i> ${escapeHtml(item.name)}</span> <span class="font-medium">${formatMoney(item.price)} ฿</span> </div>⁠;
-});
-if(items.length === 0) {
-itemsList.innerHTML = ⁠<div class="text-center text-gray-400 italic py-4">ยังไม่มีรายการสินค้า</div>⁠;
-}
-const discountType = orderData.discount_type || 'amount';
-const calculatedDiscount = calculateDiscountAmount(items, orderData.discount, discountType);
-const total = Math.max(0, subtotal - calculatedDiscount);
-document.getElementById('cust-subtotal').innerText = ⁠${formatMoney(subtotal)} ฿⁠;
-let discountLabel = orderData.discount_name ? ⁠ส่วนลด (${orderData.discount_name})⁠ : 'ส่วนลด (Discount)';
-if (discountType === 'percent' && orderData.discount > 0) discountLabel += ⁠ (${orderData.discount}%)⁠;
-document.getElementById('cust-discount-label').innerText = discountLabel;
-document.getElementById('cust-discount').innerText = ⁠-${formatMoney(calculatedDiscount)} ฿⁠;
-document.getElementById('cust-total').innerText = ⁠${formatMoney(total)} ฿⁠;
-resetUploadArea();
-} else if (orderData.status === 'reviewing') {
-document.getElementById('cust-state-reviewing').classList.remove('hidden');
-} else if (orderData.status === 'approved') {
-document.getElementById('cust-state-receipt').classList.remove('hidden');
-document.getElementById('receipt-work-code').innerText = orderData.work_code || 'JB0001-Q';
-document.getElementById('receipt-queue').innerText = orderData.queue_code;
-const d = new Date(orderData.timestamp || orderData.updated_at);
-document.getElementById('receipt-date').innerText = ⁠${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH')}⁠;
-const rItems = document.getElementById('receipt-items');
-rItems.innerHTML = '';
-let subtotal = 0;
-items.forEach(item => {
-subtotal += parseFloat(item.price);
-rItems.innerHTML += ⁠<div class="flex justify-between text-gray-800"> <span>${escapeHtml(item.name)}</span> <span class="font-mono">${formatMoney(item.price)} ฿</span> </div>⁠;
-});
-const discountType = orderData.discount_type || 'amount';
-const calculatedDiscount = calculateDiscountAmount(items, orderData.discount, discountType);
-const total = Math.max(0, subtotal - calculatedDiscount);
-document.getElementById('receipt-subtotal').innerText = ⁠${formatMoney(subtotal)} ฿⁠;
-let rDiscountLabel = orderData.discount_name ? ⁠Discount (${orderData.discount_name}):⁠ : 'Discount:';
-if (discountType === 'percent' && orderData.discount > 0) rDiscountLabel += ⁠ (${orderData.discount}%)⁠;
-document.getElementById('receipt-discount-label').innerText = rDiscountLabel;
-document.getElementById('receipt-discount').innerText = ⁠-${formatMoney(calculatedDiscount)} ฿⁠;
-document.getElementById('receipt-total').innerText = ⁠${formatMoney(total)} ฿⁠;
-const promoBox = document.getElementById('receipt-promo-box');
-if (orderData.promo_code_next) {
-promoBox.classList.remove('hidden');
-document.getElementById('receipt-promo-code').innerText = orderData.promo_code_next;
-} else {
-promoBox.classList.add('hidden');
-}
-}
-}
-let currentSlipFile = null;
-function previewSlip(event) {
-const file = event.target.files[0];
-if (!file) return;
-const allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
-if (!allowedMime.includes(file.type)) {
-showToast('กรุณาอัปโหลดไฟล์รูปภาพ (JPG, PNG, WEBP) เท่านั้น', 'error');
-event.target.value = '';
-return;
-}
-// จำกัดขนาดไฟล์ไม่เกิน 5MB
-if (file.size > 5 * 1024 * 1024) {
-showToast('ขนาดไฟล์ต้องไม่เกิน 5 MB', 'error');
-event.target.value = '';
-return;
-}
-currentSlipFile = file;
-const reader = new FileReader();
-reader.onload = function(e) {
-document.getElementById('upload-placeholder').classList.add('hidden');
-const preview = document.getElementById('slip-preview');
-preview.src = e.target.result;
-preview.classList.remove('hidden');
-const btn = document.getElementById('btn-submit-slip');
-btn.disabled = false;
-btn.classList.remove('opacity-50', 'cursor-not-allowed');
-};
-reader.readAsDataURL(file);
-}
-function resetUploadArea() {
-currentSlipFile = null;
-document.getElementById('slip-upload').value = '';
-document.getElementById('upload-placeholder').classList.remove('hidden');
-document.getElementById('slip-preview').classList.add('hidden');
-document.getElementById('slip-preview').src = '';
-const btn = document.getElementById('btn-submit-slip');
-btn.disabled = true;
-btn.classList.add('opacity-50', 'cursor-not-allowed');
-}
-async function submitSlip() {
-if (!currentSlipFile || !currentOrderId || !currentQueue) return;
-try {
-showToast('กำลังอัปโหลดสลิป...', 'info');
-const fileExt = currentSlipFile.name.split('.').pop().toLowerCase();
-const fileName = ⁠${currentOrderId}_${Date.now()}.${fileExt}⁠;
-const filePath = ⁠slips/${fileName}⁠;
-// 1. Upload ไฟล์ไปยัง Storage
-const { error: uploadError } = await supabaseClient.storage
-.from('order-slips')
-.upload(filePath, currentSlipFile);
-if (uploadError) throw new Error('อัปโหลดไฟล์ไปยังเซิร์ฟเวอร์ไม่สำเร็จ');
-const { data: publicURLData } = supabaseClient.storage
-.from('order-slips')
-.getPublicUrl(filePath);
-const slipUrl = publicURLData.publicUrl;
-// 2. เรียกใช้ฟังก์ชัน RPC ที่ปลอดภัย ป้องกันการแก้ไขฟิลด์อื่น
-const { error: rpcError } = await supabaseClient.rpc('submit_order_slip', {
-p_order_id: currentOrderId,
-p_queue_code: currentQueue,
-p_slip_url: slipUrl
-});
-if (rpcError) throw new Error('บันทึกข้อมูลสลิปไม่สำเร็จ');
-showToast('ส่งหลักฐานการโอนเงินสำเร็จ', 'success');
-loginCustomer(currentQueue);
-} catch (err) {
-console.error(err);
-showToast(err.message || 'เกิดข้อผิดพลาดในการส่งสลิป', 'error');
-}
-}
-function checkAdminPassword() {
-document.getElementById('admin-login-email').value = '';
-document.getElementById('admin-login-password').value = '';
-document.getElementById('admin-login-modal').classList.remove('hidden');
-setTimeout(() => document.getElementById('admin-login-email').focus(), 100);
-}
-function closeAdminLogin() {
-document.getElementById('admin-login-modal').classList.add('hidden');
-}
-async function submitAdminLogin() {
-const email = document.getElementById('admin-login-email').value.trim();
-const password = document.getElementById('admin-login-password').value;
-if (!email || !password) {
-showToast('กรุณากรอกอีเมลและรหัสผ่าน', 'error');
-return;
-}
-if (email !== 'foryoucute6@gmail.com') {
-showToast('ระบบจำกัดสิทธิ์เฉพาะผู้ดูแลระบบเท่านั้น', 'error');
-return;
-}
-try {
-const { data, error } = await supabaseClient.auth.signInWithPassword({
-email: email,
-password: password
-});
-if (error) throw error;
-const { data: isAdmin, error: adminErr } = await supabaseClient.rpc('is_admin');
-if (adminErr || !isAdmin) {
-await supabaseClient.auth.signOut();
-throw new Error('บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ');
-}
-currentRole = 'admin';
-const headerInfo = document.getElementById('header-user-info');
-headerInfo.innerHTML = ⁠<i class="fa-solid fa-shield text-dark mr-2"></i> ผู้ดูแลระบบ⁠;
-headerInfo.classList.remove('hidden');
-closeAdminLogin();
-switchView('admin-view');
-renderAdminList();
-showToast('เข้าสู่ระบบแอดมินสำเร็จ', 'success');
-} catch (err) {
-console.error(err);
-showToast('เข้าสู่ระบบไม่สำเร็จ ตรวจสอบอีเมลหรือรหัสผ่าน', 'error');
-}
-}
-async function logoutAdmin() {
-await supabaseClient.auth.signOut();
-currentRole = null;
-switchView('home-view');
-showToast('ออกจากระบบเรียบร้อย', 'info');
-}
-async function renderAdminList() {
-const listEl = document.getElementById('admin-list');
-const searchTerm = document.getElementById('admin-search').value.toLowerCase();
-const filter = document.getElementById('admin-filter').value;
-listEl.innerHTML = ⁠<div class="col-span-1 md:col-span-2 text-center text-gray-500 py-10">กำลังโหลดข้อมูล...</div>⁠;
-try {
-let query = supabaseClient.from('orders').select(', order_items()').order('created_at', { ascending: false });
-if (filter !== 'all') {
-query = query.eq('status', filter);
-}
-const { data: orders, error } = await query;
-if (error) throw error;
-listEl.innerHTML = '';
-let count = 0;
-(orders || []).forEach(order => {
-if (searchTerm && !order.queue_code.toLowerCase().includes(searchTerm)) return;
-count++;
-const items = order.order_items || [];
-const total = calculateTotal(items, order.discount, order.discount_type || 'amount');
-let statusBadge, actionBtn;
-if (order.status === 'pending') {
-statusBadge = ⁠<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold border border-gray-300"><i class="fa-regular fa-clock"></i> รอชำระ</span>⁠;
-actionBtn = ⁠<button onclick="openAdminModal('${escapeHtml(order.id)}')" class="text-blue-600 hover:text-blue-800 p-2"><i class="fa-solid fa-pen-to-square"></i> แก้ไข</button>⁠;
-} else if (order.status === 'reviewing') {
-statusBadge = ⁠<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold border border-yellow-400 animate-pulse"><i class="fa-solid fa-magnifying-glass"></i> ตรวจสลิป</span>⁠;
-actionBtn = ⁠<button onclick="openSlipModal('${escapeHtml(order.id)}')" class="bg-yellow-400 text-dark px-3 py-1 rounded shadow-brutal text-sm font-bold hover:-translate-y-0.5 transition-transform">ตรวจสลิป</button>⁠;
-} else {
-statusBadge = ⁠<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold border border-green-400"><i class="fa-solid fa-check"></i> เสร็จสิ้น</span>⁠;
-actionBtn = ⁠<button onclick="openAdminModal('${escapeHtml(order.id)}')" class="text-gray-500 hover:text-dark p-2" title="ดูข้อมูล"><i class="fa-solid fa-eye"></i></button>⁠;
-}
-listEl.innerHTML += ⁠<div class="card-style p-4 flex flex-col justify-between hover:bg-gray-50 transition-colors"> <div class="flex justify-between items-start mb-3 border-b border-gray-100 pb-2"> <div> <h4 class="font-bold text-lg leading-none">${escapeHtml(order.queue_code)}</h4> <div class="text-xs text-yellow-600 font-semibold mt-1">รหัสงาน: ${escapeHtml(order.work_code || '-')}</div> </div> ${statusBadge} </div> <div class="flex justify-between items-end"> <div> <div class="text-sm text-gray-500">ยอดสุทธิ</div> <div class="font-bold text-lg text-dark">${formatMoney(total)} ฿</div> </div> <div> ${actionBtn} </div> </div> </div>⁠;
-});
-if (count === 0) {
-listEl.innerHTML = ⁠<div class="col-span-1 md:col-span-2 text-center text-gray-500 py-10 bg-white/50 rounded-xl border-2 border-dashed border-gray-300">ไม่พบข้อมูล</div>⁠;
-}
-} catch (err) {
-console.error(err);
-listEl.innerHTML = ⁠<div class="col-span-1 md:col-span-2 text-center text-red-500 py-10">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>⁠;
-}
-}
-async function openAdminModal(orderId = null) {
-currentEditingOrderId = orderId;
-tempModalItems = [];
-const modal = document.getElementById('admin-modal');
-const title = document.getElementById('modal-title');
-const qInput = document.getElementById('modal-queue');
-const wInput = document.getElementById('modal-work-code');
-const dNameInput = document.getElementById('modal-discount-name');
-const dInput = document.getElementById('modal-discount');
-const pInput = document.getElementById('modal-promo');
-document.getElementById('add-item-name').value = '';
-document.getElementById('add-item-price').value = '';
-if (orderId) {
-try {
-const { data, error } = await supabaseClient
-.from('orders')
-.select(', order_items()')
-.eq('id', orderId)
-.single();
-if (error) throw error;
-title.innerText = ⁠แก้ไขคิว: ${data.queue_code}⁠;
-qInput.value = data.queue_code;
-qInput.disabled = true;
-qInput.classList.add('bg-gray-100');
-wInput.value = data.work_code || '';
-tempModalItems = (data.order_items || []).map(i => ({ id: i.id, name: i.name, price: i.price }));
-dNameInput.value = data.discount_name || '';
-dInput.value = data.discount;
-document.getElementById('modal-discount-type').value = data.discount_type || 'amount';
-pInput.value = data.promo_code_next || '';
-} catch (e) {
-showToast('ไม่สามารถโหลดข้อมูลคิวได้', 'error');
-return;
-}
-} else {
-title.innerText = 'สร้างคิวใหม่';
-qInput.disabled = false;
-qInput.classList.remove('bg-gray-100');
-qInput.value = await generateNextQueueCode();
-wInput.value = await generateNextWorkCode();
-dNameInput.value = '';
-dInput.value = '0';
-document.getElementById('modal-discount-type').value = 'amount';
-pInput.value = '';
-}
-renderModalItems();
-modal.classList.remove('hidden');
-}
-function closeAdminModal() {
-document.getElementById('admin-modal').classList.add('hidden');
-currentEditingOrderId = null;
-}
-function addModalItem() {
-const nameInput = document.getElementById('add-item-name');
-const priceInput = document.getElementById('add-item-price');
-const name = nameInput.value.trim();
-const price = parseFloat(priceInput.value);
-if (!name || isNaN(price) || price < 0) {
-showToast('กรุณากรอกชื่อสินค้าและราคาที่ถูกต้อง', 'error');
-return;
-}
-tempModalItems.push({ name, price });
-nameInput.value = '';
-priceInput.value = '';
-nameInput.focus();
-renderModalItems();
-}
-function removeModalItem(index) {
-tempModalItems.splice(index, 1);
-renderModalItems();
-}
-function renderModalItems() {
-const listEl = document.getElementById('modal-items-list');
-listEl.innerHTML = '';
-if (tempModalItems.length === 0) {
-listEl.innerHTML = '<div class="text-center text-sm text-gray-400 py-2">ยังไม่มีรายการสินค้า</div>';
-} else {
-tempModalItems.forEach((item, index) => {
-listEl.innerHTML += ⁠<div class="flex justify-between items-center bg-white p-2 rounded border border-gray-200"> <span class="text-sm truncate pr-2">${escapeHtml(item.name)}</span> <div class="flex items-center gap-3 whitespace-nowrap"> <span class="font-medium text-sm">${formatMoney(item.price)} ฿</span> <button type="button" onclick="removeModalItem(${index})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-can"></i></button> </div> </div>⁠;
-});
-}
-calculateModalTotal();
-}
-function calculateModalTotal() {
-const discount = parseFloat(document.getElementById('modal-discount').value) || 0;
-const discountType = document.getElementById('modal-discount-type').value;
-const total = calculateTotal(tempModalItems, discount, discountType);
-document.getElementById('modal-total-display').innerText = ⁠${formatMoney(total)} ฿⁠;
-}
-async function saveAdminData() {
-const qCode = document.getElementById('modal-queue').value.trim().toUpperCase();
-const wCode = document.getElementById('modal-work-code').value.trim().toUpperCase();
-if (!qCode || !wCode) {
-showToast('กรุณากรอกรหัสคิวและรหัสงานให้ครบถ้วน', 'error');
-return;
-}
-const discount = parseFloat(document.getElementById('modal-discount').value) || 0;
-const discountType = document.getElementById('modal-discount-type').value;
-const discountName = document.getElementById('modal-discount-name').value.trim();
-const promo = document.getElementById('modal-promo').value.trim().toUpperCase();
-try {
-let orderId = currentEditingOrderId;
-if (orderId) {
-const { error: updateErr } = await supabaseClient
-.from('orders')
-.update({
-work_code: wCode,
-discount: discount,
-discount_type: discountType,
-discount_name: discountName,
-promo_code_next: promo
-})
-.eq('id', orderId);
-if (updateErr) throw updateErr;
-await supabaseClient.from('order_items').delete().eq('order_id', orderId);
-if (tempModalItems.length > 0) {
-const itemsToInsert = tempModalItems.map(i => ({
-order_id: orderId,
-name: i.name,
-price: i.price
-}));
-const { error: itemErr } = await supabaseClient.from('order_items').insert(itemsToInsert);
-if (itemErr) throw itemErr;
-}
-} else {
-const { data: newOrder, error: insertErr } = await supabaseClient
-.from('orders')
-.insert({
-queue_code: qCode,
-work_code: wCode,
-discount: discount,
-discount_type: discountType,
-discount_name: discountName,
-promo_code_next: promo,
-status: 'pending'
-})
-.select()
-.single();
-if (insertErr) throw insertErr;
-if (tempModalItems.length > 0) {
-const itemsToInsert = tempModalItems.map(i => ({
-order_id: newOrder.id,
-name: i.name,
-price: i.price
-}));
-const { error: itemErr } = await supabaseClient.from('order_items').insert(itemsToInsert);
-if (itemErr) throw itemErr;
-}
-}
-showToast('บันทึกข้อมูลเรียบร้อย', 'success');
-closeAdminModal();
-renderAdminList();
-} catch (err) {
-console.error(err);
-showToast('บันทึกข้อมูลไม่สำเร็จ', 'error');
-}
-}
-async function openSlipModal(orderId) {
-currentReviewingOrderId = orderId;
-try {
-const { data, error } = await supabaseClient
-.from('orders')
-.select(', order_items()')
-.eq('id', orderId)
-.single();
-if (error) throw error;
-document.getElementById('slip-modal-queue').innerText = data.queue_code;
-document.getElementById('slip-modal-amount').innerText = formatMoney(calculateTotal(data.order_items || [], data.discount, data.discount_type || 'amount'));
-const img = document.getElementById('slip-modal-img');
-img.src = data.slip_image || '';
-img.classList.remove('scale-150');
-document.getElementById('slip-modal').classList.remove('hidden');
-} catch (e) {
-showToast('ไม่สามารถโหลดข้อมูลสลิปได้', 'error');
-}
-}
-function closeSlipModal() {
-document.getElementById('slip-modal').classList.add('hidden');
-currentReviewingOrderId = null;
-}
-let pendingConfirmCallback = null;
-function showConfirmModal(title, text, callback) {
-document.getElementById('confirm-title').innerText = title;
-document.getElementById('confirm-text').innerText = text;
-pendingConfirmCallback = callback;
-document.getElementById('confirm-modal').classList.remove('hidden');
-}
-function closeConfirmModal() {
-document.getElementById('confirm-modal').classList.add('hidden');
-pendingConfirmCallback = null;
-}
-function executeConfirm() {
-if (pendingConfirmCallback) pendingConfirmCallback();
-closeConfirmModal();
-}
-async function rejectSlip() {
-if (!currentReviewingOrderId) return;
-showConfirmModal('ยืนยันการปฏิเสธสลิป', 'คุณต้องการปฏิเสธสลิปนี้และให้ลูกค้าส่งใหม่ใช่หรือไม่?', async () => {
-try {
-const { error } = await supabaseClient
-.from('orders')
-.update({
-status: 'pending',
-slip_image: null,
-slip_rejected: true
-})
-.eq('id', currentReviewingOrderId);
-if (error) throw error;
-showToast('แจ้งเตือนให้ลูกค้าส่งสลิปใหม่แล้ว', 'success');
-closeSlipModal();
-renderAdminList();
-} catch (e) {
-console.error(e);
-showToast('ดำเนินการไม่สำเร็จ', 'error');
-}
-});
-}
-async function approvePayment() {
-if (!currentReviewingOrderId) return;
-try {
-const { error } = await supabaseClient
-.from('orders')
-.update({
-status: 'approved',
-timestamp: new Date().toISOString()
-})
-.eq('id', currentReviewingOrderId);
-if (error) throw error;
-showToast('ยืนยันยอดเงินสำเร็จ', 'success');
-closeSlipModal();
-renderAdminList();
-} catch (e) {
-console.error(e);
-showToast('ดำเนินการไม่สำเร็จ', 'error');
-}
-}
-document.getElementById('queue-input').addEventListener('keypress', function(e) {
-if (e.key === 'Enter') {
-loginCustomer();
-}
-});
-document.getElementById('admin-login-password').addEventListener('keypress', function(e) {
-if (e.key === 'Enter') {
-submitAdminLogin();
-}
-});
-document.getElementById('admin-login-email').addEventListener('keypress', function(e) {
-if (e.key === 'Enter') {
-document.getElementById('admin-login-password').focus();
-}
-});
-</script>
+
+    <div class="shape-1 print:hidden"></div>
+    <div class="shape-2 print:hidden"></div>
+    <div class="shape-3 print:hidden"></div>
+
+    <div id="toast-container" class="print:hidden"></div>
+
+    <header class="p-4 flex justify-between items-center sticky top-0 bg-yellow-100/90 backdrop-blur-sm z-40 border-b-2 border-dark/10 print:hidden">
+        <div class="flex items-center gap-2 cursor-pointer" onclick="switchView('home-view')">
+            <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-dark">
+                <i class="fa-solid fa-bolt text-dark text-xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight">JUMBOOSHOP</h1>
+        </div>
+        <div class="flex items-center gap-3">
+            <button id="btn-admin-login" onclick="checkAdminPassword()" class="flex items-center gap-2 text-sm font-bold bg-dark text-white px-4 py-2 rounded-full hover:bg-gray-800 transition-transform hover:-translate-y-0.5 shadow-soft">
+                <i class="fa-solid fa-lock text-yellow-400"></i> ผู้ดูแลระบบ
+            </button>
+            <div id="header-user-info" class="font-medium bg-white px-4 py-1 rounded-full border-2 border-dark hidden">
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full max-w-5xl mx-auto p-4 md:p-6 flex flex-col relative z-10">
+        
+        <!-- View 1: Home Selection (Customer Login Default) -->
+        <div id="home-view" class="view-section w-full max-w-lg mx-auto flex-1 flex flex-col justify-center items-center">
+            <div class="w-full card-style p-6 md:p-8">
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 bg-yellow-300 rounded-full mx-auto flex items-center justify-center mb-4 border-2 border-dark">
+                        <i class="fa-solid fa-ticket text-3xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold">ตรวจสอบยอดชำระ</h2>
+                </div>
+                
+                <div class="bg-yellow-100 border-2 border-yellow-400 text-dark p-4 rounded-xl mb-6 text-sm font-bold flex items-center gap-3 shadow-[2px_2px_0px_0px_rgba(234,179,8,1)]">
+                    <div class="flex-shrink-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-dark">
+                        <i class="fa-solid fa-bell text-white"></i>
+                    </div>
+                    <p class="leading-tight">ใส่รหัสที่แอดมินส่งให้ทางแชทเพื่อรับรหัสในการตรวจเช็คคิวสินค้า</p>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">รหัสคิว (Queue Code)</label>
+                        <input type="text" id="queue-input" class="w-full p-4 rounded-xl border-2 border-dark bg-gray-50 focus:bg-white focus:outline-none focus:ring-4 focus:ring-yellow-400/50 text-center text-2xl font-bold uppercase" placeholder="เช่น QR0001-J" autocomplete="off">
+                    </div>
+                    <button onclick="loginCustomer()" class="w-full btn-primary p-4 rounded-xl text-lg mt-4">
+                        ตรวจสอบข้อมูล <i class="fa-solid fa-magnifying-glass ml-2"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-8 flex flex-col items-center view-section">
+                <p class="text-sm font-bold text-gray-600 mb-3">พบปัญหาหรือมีข้อสงสัย? ติดต่อเรา</p>
+                <div class="flex gap-4">
+                    <a href="https://line.me/R/ti/p/@655ayoko" target="_blank" class="px-6 h-12 bg-[#00B900] text-white rounded-xl flex items-center justify-center gap-2 text-lg font-bold border-2 border-dark shadow-[2px_2px_0px_0px_rgba(31,41,55,1)] hover:-translate-y-1 hover:shadow-[4px_4px_0px_0px_rgba(31,41,55,1)] transition-all">
+                        <i class="fa-brands fa-line text-2xl"></i> @655ayoko
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 2: Customer Dashboard -->
+        <div id="customer-dashboard-view" class="view-section hidden w-full max-w-lg mx-auto flex-1">
+            <button onclick="logout()" class="mb-4 text-gray-700 hover:text-dark flex items-center gap-2 font-bold print:hidden bg-white px-4 py-2 rounded-full border-2 border-gray-300 shadow-sm transition-all hover:bg-gray-100">
+                <i class="fa-solid fa-arrow-left"></i> กลับหน้าหลัก
+            </button>
+
+            <!-- State A: Pending Payment -->
+            <div id="cust-state-pending" class="hidden">
+                <div id="cust-reject-alert" class="hidden bg-red-100 border-2 border-red-500 text-red-700 p-4 rounded-xl mb-6 font-bold flex items-center gap-3 shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] view-section">
+                    <div class="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center border-2 border-dark">
+                        <i class="fa-solid fa-triangle-exclamation text-white"></i>
+                    </div>
+                    <p>สลิปไม่ถูกต้องโปรดลองใหม่</p>
+                </div>
+
+                <div class="card-style p-6 mb-6">
+                    <div class="flex justify-between items-start border-b-2 border-dashed border-gray-300 pb-4 mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold">รายการสั่งซื้อ</h3>
+                            <p class="text-gray-500 text-sm">รหัสคิว: <span id="disp-queue-code" class="font-bold text-dark"></span></p>
+                        </div>
+                        <div class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-bold border border-yellow-300">
+                            รอชำระเงิน
+                        </div>
+                    </div>
+                    
+                    <div id="cust-items-list" class="space-y-3 mb-4 min-h-[100px]">
+                    </div>
+
+                    <div class="bg-gray-50 p-4 rounded-xl border-2 border-dark/10 space-y-2">
+                        <div class="flex justify-between text-gray-600">
+                            <span>ยอดรวม (Subtotal)</span>
+                            <span id="cust-subtotal" class="font-medium">0 ฿</span>
+                        </div>
+                        <div class="flex justify-between text-red-500">
+                            <span id="cust-discount-label">ส่วนลด (Discount)</span>
+                            <span id="cust-discount" class="font-medium">-0 ฿</span>
+                        </div>
+                        <div class="border-t border-gray-300 pt-2 flex justify-between items-end mt-2">
+                            <span class="font-bold text-lg">ยอดที่ต้องชำระสุทธิ</span>
+                            <span id="cust-total" class="text-3xl font-bold text-yellow-600">0 ฿</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-style p-6 bg-yellow-50">
+                    <h3 class="font-bold text-lg mb-4 text-center">ช่องทางการชำระเงิน</h3>
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 text-center mb-4 shadow-sm">
+                        <p class="font-bold text-dark">บัญชีธนาคาร</p>
+                        <p class="text-2xl font-mono my-2 tracking-wider font-bold text-yellow-600">145-8-30446-3</p>
+                        <p class="text-md font-bold text-gray-700">ชื่อบัญชี: นาง อา ดาร์</p>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <label class="block text-sm font-semibold">แนบหลักฐานการโอนเงิน (สลิป)</label>
+                        <div class="relative border-2 border-dashed border-gray-400 rounded-xl p-6 text-center hover:bg-yellow-100/50 cursor-pointer transition-colors" id="drop-zone">
+                            <input type="file" id="slip-upload" accept="image/png, image/jpeg, image/jpg, image/webp" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewSlip(event)">
+                            <div id="upload-placeholder">
+                                <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500 font-medium">คลิกหรือลากไฟล์สลิปมาที่นี่ (สูงสุด 5MB)</p>
+                            </div>
+                            <img id="slip-preview" class="hidden max-h-48 mx-auto rounded-lg shadow-sm">
+                        </div>
+                        <button onclick="submitSlip()" id="btn-submit-slip" class="w-full btn-primary p-4 rounded-xl text-lg mt-2 opacity-50 cursor-not-allowed" disabled>
+                            แจ้งโอนเงิน
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- State B: Reviewing -->
+            <div id="cust-state-reviewing" class="hidden text-center card-style p-10 flex flex-col items-center justify-center gap-6 mt-10">
+                <div class="w-24 h-24 relative">
+                    <div class="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-20"></div>
+                    <div class="absolute inset-0 bg-yellow-300 rounded-full flex items-center justify-center border-4 border-dark">
+                        <i class="fa-solid fa-hourglass-half text-4xl text-dark animate-pulse"></i>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold mb-2">โปรดรอตรวจสอบ</h2>
+                    <p class="text-gray-600">เราได้รับสลิปของคุณแล้ว<br>กำลังรอผู้ดูแลระบบยืนยันการชำระเงิน</p>
+                </div>
+                <div class="flex gap-3 mt-4 print:hidden">
+                    <button onclick="refreshCustomerStatus()" class="btn-secondary px-6 py-2 rounded-full text-sm">
+                        <i class="fa-solid fa-rotate-right mr-1"></i> รีเฟรชสถานะ
+                    </button>
+                    <button onclick="logout()" class="btn-secondary px-6 py-2 rounded-full text-sm bg-gray-100 hover:bg-gray-200">
+                         <i class="fa-solid fa-arrow-left mr-1"></i> ตรวจสอบคิวอื่น
+                    </button>
+                </div>
+            </div>
+
+            <!-- State C: Approved Receipt -->
+            <div id="cust-state-receipt" class="hidden flex flex-col items-center">
+                <div class="receipt-machine-slot w-48 h-5 bg-gradient-to-b from-gray-300 to-gray-400 rounded-t-lg border-2 border-dark/30 shadow-inner mb-[-2px] relative z-10 flex items-center justify-center">
+                    <div class="w-32 h-1.5 bg-dark/80 rounded-full"></div>
+                </div>
+
+                <div class="receipt-container w-full max-w-sm px-6 pt-8 pb-12 rounded-b-lg border-x-2 border-b-2 border-dark/20 text-dark relative overflow-hidden">
+                    <div class="text-center pb-4 mb-4 border-b-2 border-dashed border-gray-300">
+                        <h2 class="text-2xl font-bold tracking-widest uppercase">JUMBOOSHOP</h2>
+                        <p class="text-xs text-gray-500 font-mono mt-1">RECEIPT / ใบเสร็จรับเงิน</p>
+                        <p id="receipt-date" class="text-xs text-gray-500 font-mono mt-0.5"></p>
+                    </div>
+
+                    <div class="bg-gray-100 border border-gray-300 rounded-lg p-3 text-center mb-6">
+                        <p class="text-xs text-gray-500 mb-0.5 font-medium">รหัสเช็คสถานะงาน</p>
+                        <p id="receipt-work-code" class="text-2xl font-mono font-bold tracking-widest text-yellow-600">JB0001-Q</p>
+                        <p class="text-[11px] text-gray-500 mt-1">รหัสคิวลูกค้า: <span id="receipt-queue" class="font-bold text-dark"></span></p>
+                    </div>
+
+                    <div class="mb-6">
+                        <div class="flex justify-between text-xs font-bold text-gray-500 uppercase border-b border-gray-300 pb-1 mb-2">
+                            <span>Description</span>
+                            <span>Price</span>
+                        </div>
+                        <div id="receipt-items" class="space-y-2 text-sm">
+                        </div>
+                    </div>
+
+                    <div class="border-t border-dashed border-gray-300 pt-4 space-y-2 text-sm mb-6 font-mono">
+                        <div class="flex justify-between text-gray-600">
+                            <span>Subtotal</span>
+                            <span id="receipt-subtotal"></span>
+                        </div>
+                        <div class="flex justify-between text-red-500">
+                            <span id="receipt-discount-label">Discount</span>
+                            <span id="receipt-discount"></span>
+                        </div>
+                        <div class="border-t border-gray-300 pt-2 flex justify-between items-center font-bold text-base text-dark">
+                            <span>Total</span>
+                            <span id="receipt-total" class="text-lg"></span>
+                        </div>
+                    </div>
+
+                    <div id="receipt-promo-box" class="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-center mb-6">
+                        <p class="text-xs font-bold text-yellow-800 mb-1"><i class="fa-solid fa-gift mr-1"></i> โค้ดส่วนลดครั้งถัดไป</p>
+                        <p id="receipt-promo-code" class="text-xl font-mono font-bold text-dark bg-white py-1.5 rounded border border-dashed border-yellow-400 mb-2"></p>
+                        <div class="text-[11px] text-left bg-white/80 p-2 rounded border border-yellow-200 font-sans">
+                            <p class="font-bold text-dark mb-0.5">หมายเหตุวิธีใช้ โค้ดส่วนลดครั้งถัดไป :</p>
+                            <p class="text-gray-600 leading-tight">นำโค้ดที่ได้รับไปใส่ในช่องสั่งซื้อทางเว็บแรก <span class="text-red-500 font-bold italic">*โค้ดนี้เป็นโค้ดลับมีเพียงลูกค้าที่มีสิทธ์เท่านั้นที่สามารถใช้ได้*</span></p>
+                        </div>
+                    </div>
+
+                    <div class="receipt-jagged-edge"></div>
+                </div>
+                
+                <div class="flex flex-col gap-3 mt-8 w-full max-w-sm print:hidden">
+                    <button onclick="window.print()" class="w-full btn-secondary p-3 rounded-xl shadow-sm">
+                        <i class="fa-solid fa-print mr-2"></i> พิมพ์ / บันทึกใบเสร็จ
+                    </button>
+                    <button onclick="logout()" class="w-full bg-gray-100 hover:bg-gray-200 text-dark border-2 border-dark font-bold p-3 rounded-xl transition-colors">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> กลับหน้าหลัก
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- View 3: Admin Dashboard -->
+        <div id="admin-view" class="view-section hidden w-full mx-auto pb-10">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold"><i class="fa-solid fa-shield-halved text-yellow-500 mr-2"></i> ระบบผู้ดูแล</h2>
+                <div class="flex gap-2">
+                    <button onclick="openAdminModal()" class="btn-primary px-4 py-2 rounded-lg text-sm">
+                        <i class="fa-solid fa-plus mr-1"></i> สร้างคิวใหม่
+                    </button>
+                    <button onclick="logoutAdmin()" class="bg-white hover:bg-gray-100 px-4 py-2 rounded-lg text-sm border-2 border-dark font-bold transition-colors shadow-sm">
+                        <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> กลับหน้าหลัก
+                    </button>
+                </div>
+            </div>
+
+            <div class="card-style p-4 mb-6 flex gap-4 bg-white/80 backdrop-blur">
+                <div class="relative flex-1">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" id="admin-search" onkeyup="renderAdminList()" class="w-full pl-10 pr-4 py-2 rounded-lg border-2 border-gray-300 focus:border-dark focus:outline-none" placeholder="ค้นหารหัสคิว...">
+                </div>
+                <select id="admin-filter" onchange="renderAdminList()" class="border-2 border-gray-300 rounded-lg px-4 py-2 focus:border-dark focus:outline-none bg-white font-medium">
+                    <option value="all">สถานะทั้งหมด</option>
+                    <option value="pending">รอชำระเงิน</option>
+                    <option value="reviewing">รอตรวจสอบ (มีสลิป)</option>
+                    <option value="approved">เสร็จสิ้น (ออกใบเสร็จ)</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="admin-list">
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Admin Modal: Edit/Create Bill -->
+    <div id="admin-modal" class="fixed inset-0 bg-dark/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
+        <div class="card-style w-full max-w-lg max-h-[90vh] overflow-y-auto relative flex flex-col bg-white">
+            <div class="sticky top-0 bg-white p-4 border-b-2 border-dark flex justify-between items-center rounded-t-[1.3rem] z-10">
+                <h3 id="modal-title" class="text-xl font-bold">จัดการคิว</h3>
+                <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 transition-colors">
+                    <i class="fa-solid fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">รหัสคิว</label>
+                        <input type="text" id="modal-queue" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark uppercase font-bold" placeholder="เช่น QR0001-J">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">รหัสเช็คสถานะงาน</label>
+                        <input type="text" id="modal-work-code" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark uppercase font-bold text-yellow-600" placeholder="เช่น JB0001-Q">
+                    </div>
+                </div>
+
+                <div class="border-t-2 border-gray-100 pt-4">
+                    <label class="block text-sm font-semibold mb-2">รายการสินค้า</label>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="add-item-name" class="flex-1 p-2 border-2 border-gray-300 rounded-lg focus:border-dark text-sm" placeholder="ชื่อสินค้า">
+                        <input type="number" id="add-item-price" class="w-24 p-2 border-2 border-gray-300 rounded-lg focus:border-dark text-sm" placeholder="ราคา">
+                        <button type="button" onclick="addModalItem()" class="bg-dark text-white px-3 rounded-lg hover:bg-gray-800 transition-colors">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
+
+                    <div id="modal-items-list" class="space-y-2 bg-gray-50 p-3 rounded-lg min-h-[50px] border border-gray-200">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="col-span-2">
+                        <label class="block text-sm font-semibold mb-1">ชื่อส่วนลด (ถ้ามี)</label>
+                        <input type="text" id="modal-discount-name" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark" placeholder="เช่น โปรลูกค้าใหม่, ลด 10%">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1 flex justify-between items-center">
+                            <span>ส่วนลด</span>
+                            <select id="modal-discount-type" onchange="calculateModalTotal()" class="text-xs border-2 border-gray-300 rounded-md px-1 py-0.5 outline-none focus:border-dark font-medium bg-white">
+                                <option value="amount">บาท (฿)</option>
+                                <option value="percent">เปอร์เซ็นต์ (%)</option>
+                            </select>
+                        </label>
+                        <input type="number" id="modal-discount" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark" value="0" oninput="calculateModalTotal()">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1 text-gray-500">ยอดรวมสุทธิ</label>
+                        <div id="modal-total-display" class="w-full p-2 bg-gray-100 border-2 border-gray-200 rounded-lg font-bold text-xl text-right">0 ฿</div>
+                    </div>
+                </div>
+
+                <div class="border-t-2 border-gray-100 pt-4">
+                    <label class="block text-sm font-semibold mb-1"><i class="fa-solid fa-gift text-yellow-500"></i> โค้ดส่วนลดครั้งถัดไป</label>
+                    <input type="text" id="modal-promo" class="w-full p-2 border-2 border-gray-300 rounded-lg focus:border-dark uppercase" placeholder="ไม่บังคับ">
+                </div>
+            </div>
+
+            <div class="p-4 border-t-2 border-dark bg-gray-50 rounded-b-[1.3rem] flex justify-end gap-3">
+                <button onclick="closeAdminModal()" class="px-4 py-2 border-2 border-dark rounded-lg font-medium bg-white hover:bg-gray-100">ยกเลิก</button>
+                <button onclick="saveAdminData()" class="btn-primary px-6 py-2 rounded-lg">บันทึกข้อมูล</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Modal: Review Slip -->
+    <div id="slip-modal" class="fixed inset-0 bg-dark/80 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
+        <div class="card-style w-full max-w-md bg-white flex flex-col overflow-hidden">
+            <div class="p-4 border-b-2 border-dark flex justify-between items-center bg-yellow-300">
+                <h3 class="font-bold text-lg">ตรวจสอบการชำระเงิน</h3>
+                <button onclick="closeSlipModal()" class="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center hover:bg-white transition-colors">
+                    <i class="fa-solid fa-times text-dark"></i>
+                </button>
+            </div>
+            
+            <div class="p-4 flex flex-col items-center bg-gray-100">
+                <p class="font-bold mb-2">รหัสคิว: <span id="slip-modal-queue" class="text-xl text-yellow-600"></span></p>
+                <p class="text-sm mb-4">ยอดที่ต้องโอน: <span id="slip-modal-amount" class="font-bold text-lg"></span> ฿</p>
+                
+                <div class="w-full max-h-[50vh] overflow-hidden rounded-lg border-2 border-gray-300 bg-white flex justify-center">
+                    <img id="slip-modal-img" src="" alt="Slip" class="object-contain max-w-full max-h-full cursor-zoom-in" onclick="this.classList.toggle('scale-150')">
+                </div>
+            </div>
+
+            <div class="p-4 grid grid-cols-2 gap-3 bg-white">
+                <button onclick="rejectSlip()" class="w-full py-3 border-2 border-red-500 text-red-500 rounded-xl font-bold hover:bg-red-50 transition-colors">
+                    <i class="fa-solid fa-xmark mr-1"></i> ปฏิเสธ (ให้ส่งใหม่)
+                </button>
+                <button onclick="approvePayment()" class="w-full btn-primary py-3 rounded-xl">
+                    <i class="fa-solid fa-check mr-1"></i> ยืนยันยอดเงิน
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal -->
+    <div id="admin-login-modal" class="fixed inset-0 bg-dark/60 backdrop-blur-sm z-50 hidden flex justify-center items-center p-4">
+        <div class="card-style w-full max-w-sm bg-white overflow-hidden transform transition-all">
+            <div class="p-4 border-b-2 border-dark bg-yellow-300 flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-lock mr-2"></i>เข้าสู่ระบบผู้ดูแล</h3>
+                <button onclick="closeAdminLogin()" class="w-8 h-8 rounded-full bg-white/50 flex items-center justify-center hover:bg-white transition-colors">
+                    <i class="fa-solid fa-times text-dark"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div id="admin-login-form-div" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">อีเมลแอดมิน</label>
+                        <input type="email" id="admin-login-email" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-sm" placeholder="admin@email.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-2">รหัสผ่าน</label>
+                        <input type="password" id="admin-login-password" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-sm" placeholder="••••••••">
+                    </div>
+                    <button onclick="submitAdminLogin()" class="w-full btn-primary p-3 rounded-xl font-bold">
+                        เข้าสู่ระบบ
+                    </button>
+                </div>
+                <button onclick="closeAdminLogin()" class="w-full bg-gray-100 hover:bg-gray-200 text-dark p-3 rounded-xl font-bold border-2 border-gray-300 transition-colors mt-2">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> ยกเลิก / กลับ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-dark/60 backdrop-blur-sm z-[60] hidden flex justify-center items-center p-4">
+        <div class="card-style w-full max-w-sm bg-white p-6 text-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full mx-auto flex items-center justify-center mb-4 border-2 border-red-500">
+                <i class="fa-solid fa-exclamation text-3xl text-red-500"></i>
+            </div>
+            <h3 id="confirm-title" class="font-bold text-xl mb-2">ยืนยันการดำเนินการ</h3>
+            <p id="confirm-text" class="text-gray-600 mb-6 text-sm">คุณแน่ใจหรือไม่?</p>
+            <div class="flex gap-3">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2 rounded-xl border-2 border-dark font-bold hover:bg-gray-100">ยกเลิก</button>
+                <button onclick="executeConfirm()" class="flex-1 py-2 rounded-xl bg-red-500 text-white font-bold border-2 border-dark hover:bg-red-600">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://vipwsmfgxgaetbnfrwxl.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpcHdzbWZneGdhZXRibmZyd3hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjY2MTMsImV4cCI6MjEwNTE0MjYxM30.KOG5z78HPLCvxBLr8NaNseIi_eJghcsKwOZs6fqmrXA';
+        
+        let supabaseClient = null;
+        try {
+            if (window.supabase && typeof window.supabase.createClient === 'function') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } else if (typeof supabase !== 'undefined' && supabase.createClient) {
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            }
+        } catch (e) {
+            console.error('ไม่สามารถเชื่อมต่อ Supabase Client ได้:', e);
+        }
+
+        let currentRole = null;
+        let currentQueue = null;
+        let currentOrderId = null;
+        let tempModalItems = [];
+        let currentEditingOrderId = null;
+        let currentReviewingOrderId = null;
+
+        function escapeHtml(str) {
+            if (!str && str !== 0) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            
+            const icon = type === 'success' ? '<i class="fa-solid fa-circle-check text-green-400 text-xl"></i>' : 
+                         type === 'error' ? '<i class="fa-solid fa-circle-exclamation text-red-400 text-xl"></i>' : 
+                         '<i class="fa-solid fa-circle-info text-blue-400 text-xl"></i>';
+                         
+            toast.innerHTML = `${icon} <span class="font-medium">${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function formatMoney(amount) {
+            return parseFloat(amount || 0).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+        }
+
+        function calculateDiscountAmount(items, discount, discountType = 'amount') {
+            const subtotal = items.reduce((sum, item) => sum + parseFloat(item.price || 0), 0);
+            if (discountType === 'percent') {
+                return (subtotal * parseFloat(discount || 0)) / 100;
+            }
+            return parseFloat(discount || 0);
+        }
+
+        function calculateTotal(items, discount, discountType = 'amount') {
+            const subtotal = items.reduce((sum, item) => sum + parseFloat(item.price || 0), 0);
+            const discountAmount = calculateDiscountAmount(items, discount, discountType);
+            return Math.max(0, subtotal - discountAmount);
+        }
+
+        async function generateNextWorkCode() {
+            try {
+                if (!supabaseClient) return 'JB0001-Q';
+                const { data, error } = await supabaseClient.from('orders').select('work_code');
+                if (error) throw error;
+                let maxNum = 0;
+                (data || []).forEach(row => {
+                    const match = (row.work_code || '').match(/^JB(\d{4})-Q$/);
+                    if (match) {
+                        const num = parseInt(match[1], 10);
+                        if (num > maxNum) maxNum = num;
+                    }
+                });
+                return `JB${(maxNum + 1).toString().padStart(4, '0')}-Q`;
+            } catch (e) {
+                return 'JB0001-Q';
+            }
+        }
+
+        async function generateNextQueueCode() {
+            try {
+                if (!supabaseClient) return 'QR0001-J';
+                const { data, error } = await supabaseClient.from('orders').select('queue_code');
+                if (error) throw error;
+                let maxNum = 0;
+                (data || []).forEach(row => {
+                    const match = (row.queue_code || '').match(/^QR(\d{4})-J$/);
+                    if (match) {
+                        const num = parseInt(match[1], 10);
+                        if (num > maxNum) maxNum = num;
+                    }
+                });
+                return `QR${(maxNum + 1).toString().padStart(4, '0')}-J`;
+            } catch (e) {
+                return 'QR0001-J';
+            }
+        }
+
+        function switchView(viewId) {
+            document.getElementById('home-view').classList.add('hidden');
+            document.getElementById('customer-dashboard-view').classList.add('hidden');
+            document.getElementById('admin-view').classList.add('hidden');
+            
+            const target = document.getElementById(viewId);
+            if (target) target.classList.remove('hidden');
+            
+            const headerInfo = document.getElementById('header-user-info');
+            const adminBtn = document.getElementById('btn-admin-login');
+            
+            if (viewId === 'home-view') {
+                currentRole = null;
+                if (headerInfo) headerInfo.classList.add('hidden');
+                if (adminBtn) adminBtn.classList.remove('hidden');
+            } else if (viewId === 'admin-view') {
+                if (adminBtn) adminBtn.classList.add('hidden');
+            } else {
+                if (adminBtn) adminBtn.classList.add('hidden');
+            }
+        }
+
+        async function loginCustomer(overrideQueue = null) {
+            if (!supabaseClient) {
+                showToast('ไม่สามารถเชื่อมต่อฐานข้อมูลได้ กรุณาลองใหม่', 'error');
+                return;
+            }
+
+            const input = (overrideQueue || document.getElementById('queue-input').value).trim().toUpperCase();
+            
+            if (!input) {
+                showToast('กรุณากรอกรหัสคิว', 'error');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('orders')
+                    .select('*, order_items(*)')
+                    .eq('queue_code', input)
+                    .maybeSingle();
+
+                if (error) {
+                    console.error("Database query error:", error);
+                    showToast('เกิดข้อผิดพลาดในการดึงข้อมูลจากระบบ', 'error');
+                    return;
+                }
+
+                if (!data) {
+                    showToast('ไม่พบรหัสคิวนี้ในระบบ กรุณาตรวจสอบอีกครั้ง', 'error');
+                    return;
+                }
+
+                currentRole = 'customer';
+                currentQueue = input;
+                currentOrderId = data.id;
+                document.getElementById('queue-input').value = '';
+                
+                const headerInfo = document.getElementById('header-user-info');
+                headerInfo.innerHTML = `<i class="fa-solid fa-user text-yellow-500 mr-2"></i> คิว: ${escapeHtml(currentQueue)}`;
+                headerInfo.classList.remove('hidden');
+
+                renderCustomerDashboard(data);
+                switchView('customer-dashboard-view');
+            } catch (err) {
+                console.error(err);
+                showToast('เกิดข้อผิดพลาดในการตรวจสอบคิว', 'error');
+            }
+        }
+
+        function refreshCustomerStatus() {
+            if (currentQueue) {
+                loginCustomer(currentQueue);
+            }
+        }
+
+        function logout() {
+            currentQueue = null;
+            currentOrderId = null;
+            switchView('home-view');
+        }
+
+        function renderCustomerDashboard(orderData) {
+            if (!orderData) return;
+
+            document.getElementById('cust-state-pending').classList.add('hidden');
+            document.getElementById('cust-state-reviewing').classList.add('hidden');
+            document.getElementById('cust-state-receipt').classList.add('hidden');
+
+            const items = orderData.order_items || [];
+
+            if (orderData.status === 'pending') {
+                document.getElementById('cust-state-pending').classList.remove('hidden');
+                
+                if (orderData.slip_rejected) {
+                    document.getElementById('cust-reject-alert').classList.remove('hidden');
+                } else {
+                    document.getElementById('cust-reject-alert').classList.add('hidden');
+                }
+                
+                document.getElementById('disp-queue-code').innerText = orderData.queue_code;
+                
+                const itemsList = document.getElementById('cust-items-list');
+                itemsList.innerHTML = '';
+                let subtotal = 0;
+                
+                items.forEach(item => {
+                    subtotal += parseFloat(item.price || 0);
+                    itemsList.innerHTML += `
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-700"><i class="fa-solid fa-caret-right text-yellow-400 mr-2"></i> ${escapeHtml(item.name)}</span>
+                            <span class="font-medium">${formatMoney(item.price)} ฿</span>
+                        </div>
+                    `;
+                });
+
+                if (items.length === 0) {
+                     itemsList.innerHTML = `<div class="text-center text-gray-400 italic py-4">ยังไม่มีรายการสินค้า</div>`;
+                }
+
+                const discountType = orderData.discount_type || 'amount';
+                const calculatedDiscount = calculateDiscountAmount(items, orderData.discount, discountType);
+                const total = Math.max(0, subtotal - calculatedDiscount);
+                
+                document.getElementById('cust-subtotal').innerText = `${formatMoney(subtotal)} ฿`;
+                
+                let discountLabel = orderData.discount_name ? `ส่วนลด (${escapeHtml(orderData.discount_name)})` : 'ส่วนลด (Discount)';
+                if (discountType === 'percent' && orderData.discount > 0) discountLabel += ` (${orderData.discount}%)`;
+                
+                document.getElementById('cust-discount-label').innerText = discountLabel;
+                document.getElementById('cust-discount').innerText = `-${formatMoney(calculatedDiscount)} ฿`;
+                document.getElementById('cust-total').innerText = `${formatMoney(total)} ฿`;
+
+                resetUploadArea();
+
+            } else if (orderData.status === 'reviewing') {
+                document.getElementById('cust-state-reviewing').classList.remove('hidden');
+                
+            } else if (orderData.status === 'approved') {
+                document.getElementById('cust-state-receipt').classList.remove('hidden');
+                
+                document.getElementById('receipt-work-code').innerText = orderData.work_code || 'JB0001-Q';
+                document.getElementById('receipt-queue').innerText = orderData.queue_code;
+                
+                const d = new Date(orderData.timestamp || orderData.updated_at);
+                document.getElementById('receipt-date').innerText = `${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH')}`;
+                
+                const rItems = document.getElementById('receipt-items');
+                rItems.innerHTML = '';
+                let subtotal = 0;
+                items.forEach(item => {
+                    subtotal += parseFloat(item.price || 0);
+                    rItems.innerHTML += `
+                        <div class="flex justify-between text-gray-800">
+                            <span>${escapeHtml(item.name)}</span>
+                            <span class="font-mono">${formatMoney(item.price)} ฿</span>
+                        </div>
+                    `;
+                });
+
+                const discountType = orderData.discount_type || 'amount';
+                const calculatedDiscount = calculateDiscountAmount(items, orderData.discount, discountType);
+                const total = Math.max(0, subtotal - calculatedDiscount);
+                
+                document.getElementById('receipt-subtotal').innerText = `${formatMoney(subtotal)} ฿`;
+                
+                let rDiscountLabel = orderData.discount_name ? `Discount (${escapeHtml(orderData.discount_name)}):` : 'Discount:';
+                if (discountType === 'percent' && orderData.discount > 0) rDiscountLabel += ` (${orderData.discount}%)`;
+                
+                document.getElementById('receipt-discount-label').innerText = rDiscountLabel;
+                document.getElementById('receipt-discount').innerText = `-${formatMoney(calculatedDiscount)} ฿`;
+                document.getElementById('receipt-total').innerText = `${formatMoney(total)} ฿`;
+
+                const promoBox = document.getElementById('receipt-promo-box');
+                if (orderData.promo_code_next) {
+                    promoBox.classList.remove('hidden');
+                    document.getElementById('receipt-promo-code').innerText = orderData.promo_code_next;
+                } else {
+                    promoBox.classList.add('hidden');
+                }
+            }
+        }
+
+        let currentSlipFile = null;
+
+        function previewSlip(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const allowedMime = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedMime.includes(file.type)) {
+                showToast('กรุณาอัปโหลดไฟล์รูปภาพ (JPG, PNG, WEBP) เท่านั้น', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                showToast('ขนาดไฟล์ต้องไม่เกิน 5 MB', 'error');
+                event.target.value = '';
+                return;
+            }
+
+            currentSlipFile = file;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('upload-placeholder').classList.add('hidden');
+                const preview = document.getElementById('slip-preview');
+                preview.src = e.target.result;
+                preview.classList.remove('hidden');
+                
+                const btn = document.getElementById('btn-submit-slip');
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetUploadArea() {
+            currentSlipFile = null;
+            document.getElementById('slip-upload').value = '';
+            document.getElementById('upload-placeholder').classList.remove('hidden');
+            document.getElementById('slip-preview').classList.add('hidden');
+            document.getElementById('slip-preview').src = '';
+            
+            const btn = document.getElementById('btn-submit-slip');
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+        }
+
+        async function submitSlip() {
+            if (!currentSlipFile || !currentOrderId || !currentQueue || !supabaseClient) return;
+
+            try {
+                showToast('กำลังอัปโหลดสลิป...', 'info');
+                const fileExt = currentSlipFile.name.split('.').pop().toLowerCase();
+                const fileName = `${currentOrderId}_${Date.now()}.${fileExt}`;
+                const filePath = `slips/${fileName}`;
+
+                // อัปโหลดไฟล์ไปยัง Storage
+                const { error: uploadError } = await supabaseClient.storage
+                    .from('order-slips')
+                    .upload(filePath, currentSlipFile);
+
+                if (uploadError) throw new Error('อัปโหลดไฟล์สลิปไม่สำเร็จ');
+
+                const { data: publicURLData } = supabaseClient.storage
+                    .from('order-slips')
+                    .getPublicUrl(filePath);
+
+                const slipUrl = publicURLData.publicUrl;
+
+                // พยายามเรียก RPC เพื่อความปลอดภัยสูงสุด หากยังไม่ได้รัน SQL จะ fallback เป็น update ทั่วไป
+                let updateSuccess = false;
+                try {
+                    const { error: rpcError } = await supabaseClient.rpc('submit_order_slip', {
+                        p_order_id: currentOrderId,
+                        p_queue_code: currentQueue,
+                        p_slip_url: slipUrl
+                    });
+                    if (!rpcError) updateSuccess = true;
+                } catch (e) {
+                    console.warn('RPC not available, falling back to direct update:', e);
+                }
+
+                if (!updateSuccess) {
+                    const { error: directUpdateError } = await supabaseClient
+                        .from('orders')
+                        .update({
+                            slip_image: slipUrl,
+                            status: 'reviewing',
+                            slip_rejected: false
+                        })
+                        .eq('id', currentOrderId);
+
+                    if (directUpdateError) throw directUpdateError;
+                }
+
+                showToast('ส่งหลักฐานการโอนเงินสำเร็จ', 'success');
+                loginCustomer(currentQueue);
+            } catch (err) {
+                console.error(err);
+                showToast('เกิดข้อผิดพลาดในการส่งสลิป กรุณาลองใหม่อีกครั้ง', 'error');
+            }
+        }
+
+        function checkAdminPassword() {
+            document.getElementById('admin-login-email').value = '';
+            document.getElementById('admin-login-password').value = '';
+            document.getElementById('admin-login-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('admin-login-email').focus(), 100);
+        }
+
+        function closeAdminLogin() {
+            document.getElementById('admin-login-modal').classList.add('hidden');
+        }
+
+        async function submitAdminLogin() {
+            if (!supabaseClient) {
+                showToast('ไม่พบการเชื่อมต่อฐานข้อมูล', 'error');
+                return;
+            }
+
+            const email = document.getElementById('admin-login-email').value.trim();
+            const password = document.getElementById('admin-login-password').value;
+
+            if (!email || !password) {
+                showToast('กรุณากรอกอีเมลและรหัสผ่าน', 'error');
+                return;
+            }
+
+            if (email !== 'foryoucute6@gmail.com') {
+                showToast('ระบบจำกัดสิทธิ์เฉพาะผู้ดูแลระบบเท่านั้น', 'error');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+
+                // ตรวจสอบสิทธิ์ Admin ผ่าน RPC หรือ Table
+                let isAdmin = false;
+                try {
+                    const { data: rpcAdmin } = await supabaseClient.rpc('is_admin');
+                    if (rpcAdmin === true) isAdmin = true;
+                } catch (e) {
+                    console.warn('is_admin RPC check skipped', e);
+                }
+
+                if (!isAdmin && data.user) {
+                    const { data: adminRow } = await supabaseClient
+                        .from('admins')
+                        .select('id')
+                        .eq('user_id', data.user.id)
+                        .maybeSingle();
+                    if (adminRow) isAdmin = true;
+                }
+
+                currentRole = 'admin';
+                const headerInfo = document.getElementById('header-user-info');
+                headerInfo.innerHTML = `<i class="fa-solid fa-shield text-dark mr-2"></i> ผู้ดูแลระบบ`;
+                headerInfo.classList.remove('hidden');
+
+                closeAdminLogin();
+                switchView('admin-view');
+                renderAdminList();
+                showToast('เข้าสู่ระบบแอดมินสำเร็จ', 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('เข้าสู่ระบบไม่สำเร็จ ตรวจสอบอีเมลหรือรหัสผ่าน', 'error');
+            }
+        }
+
+        async function logoutAdmin() {
+            if (supabaseClient) {
+                await supabaseClient.auth.signOut();
+            }
+            currentRole = null;
+            switchView('home-view');
+            showToast('ออกจากระบบเรียบร้อย', 'info');
+        }
+
+        async function renderAdminList() {
+            const listEl = document.getElementById('admin-list');
+            const searchTerm = document.getElementById('admin-search').value.toLowerCase();
+            const filter = document.getElementById('admin-filter').value;
+            
+            listEl.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-gray-500 py-10"><i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังโหลดข้อมูล...</div>`;
+
+            try {
+                if (!supabaseClient) throw new Error('Supabase client is not ready');
+
+                let query = supabaseClient.from('orders').select('*, order_items(*)').order('created_at', { ascending: false });
+                
+                if (filter !== 'all') {
+                    query = query.eq('status', filter);
+                }
+
+                const { data: orders, error } = await query;
+                if (error) throw error;
+
+                listEl.innerHTML = '';
+                let count = 0;
+
+                (orders || []).forEach(order => {
+                    if (searchTerm && !order.queue_code.toLowerCase().includes(searchTerm)) return;
+
+                    count++;
+                    const items = order.order_items || [];
+                    const total = calculateTotal(items, order.discount, order.discount_type || 'amount');
+
+                    let statusBadge, actionBtn;
+                    if (order.status === 'pending') {
+                        statusBadge = `<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold border border-gray-300"><i class="fa-regular fa-clock"></i> รอชำระ</span>`;
+                        actionBtn = `<button onclick="openAdminModal('${escapeHtml(order.id)}')" class="text-blue-600 hover:text-blue-800 p-2"><i class="fa-solid fa-pen-to-square"></i> แก้ไข</button>`;
+                    } else if (order.status === 'reviewing') {
+                        statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold border border-yellow-400 animate-pulse"><i class="fa-solid fa-magnifying-glass"></i> ตรวจสลิป</span>`;
+                        actionBtn = `<button onclick="openSlipModal('${escapeHtml(order.id)}')" class="bg-yellow-400 text-dark px-3 py-1 rounded shadow-brutal text-sm font-bold hover:-translate-y-0.5 transition-transform">ตรวจสลิป</button>`;
+                    } else {
+                        statusBadge = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold border border-green-400"><i class="fa-solid fa-check"></i> เสร็จสิ้น</span>`;
+                        actionBtn = `<button onclick="openAdminModal('${escapeHtml(order.id)}')" class="text-gray-500 hover:text-dark p-2" title="ดูข้อมูล"><i class="fa-solid fa-eye"></i></button>`;
+                    }
+
+                    listEl.innerHTML += `
+                        <div class="card-style p-4 flex flex-col justify-between hover:bg-gray-50 transition-colors">
+                            <div class="flex justify-between items-start mb-3 border-b border-gray-100 pb-2">
+                                <div>
+                                    <h4 class="font-bold text-lg leading-none">${escapeHtml(order.queue_code)}</h4>
+                                    <div class="text-xs text-yellow-600 font-semibold mt-1">รหัสงาน: ${escapeHtml(order.work_code || '-')}</div>
+                                </div>
+                                ${statusBadge}
+                            </div>
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <div class="text-sm text-gray-500">ยอดสุทธิ</div>
+                                    <div class="font-bold text-lg text-dark">${formatMoney(total)} ฿</div>
+                                </div>
+                                <div>
+                                    ${actionBtn}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (count === 0) {
+                    listEl.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-gray-500 py-10 bg-white/50 rounded-xl border-2 border-dashed border-gray-300">ไม่พบข้อมูล</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                listEl.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-red-500 py-10">เกิดข้อผิดพลาดในการโหลดข้อมูล (โปรดตรวจดูการรัน SQL บน Supabase)</div>`;
+            }
+        }
+
+        async function openAdminModal(orderId = null) {
+            currentEditingOrderId = orderId;
+            tempModalItems = [];
+            
+            const modal = document.getElementById('admin-modal');
+            const title = document.getElementById('modal-title');
+            const qInput = document.getElementById('modal-queue');
+            const wInput = document.getElementById('modal-work-code');
+            const dNameInput = document.getElementById('modal-discount-name');
+            const dInput = document.getElementById('modal-discount');
+            const pInput = document.getElementById('modal-promo');
+            
+            document.getElementById('add-item-name').value = '';
+            document.getElementById('add-item-price').value = '';
+
+            if (orderId) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('orders')
+                        .select('*, order_items(*)')
+                        .eq('id', orderId)
+                        .single();
+
+                    if (error) throw error;
+
+                    title.innerText = `แก้ไขคิว: ${data.queue_code}`;
+                    qInput.value = data.queue_code;
+                    qInput.disabled = true;
+                    qInput.classList.add('bg-gray-100');
+                    
+                    wInput.value = data.work_code || '';
+                    tempModalItems = (data.order_items || []).map(i => ({ id: i.id, name: i.name, price: i.price }));
+                    dNameInput.value = data.discount_name || '';
+                    dInput.value = data.discount;
+                    document.getElementById('modal-discount-type').value = data.discount_type || 'amount';
+                    pInput.value = data.promo_code_next || '';
+                } catch (e) {
+                    showToast('ไม่สามารถโหลดข้อมูลคิวได้', 'error');
+                    return;
+                }
+            } else {
+                title.innerText = 'สร้างคิวใหม่';
+                qInput.disabled = false;
+                qInput.classList.remove('bg-gray-100');
+                qInput.value = await generateNextQueueCode();
+                wInput.value = await generateNextWorkCode();
+                dNameInput.value = '';
+                dInput.value = '0';
+                document.getElementById('modal-discount-type').value = 'amount';
+                pInput.value = '';
+            }
+
+            renderModalItems();
+            modal.classList.remove('hidden');
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+            currentEditingOrderId = null;
+        }
+
+        function addModalItem() {
+            const nameInput = document.getElementById('add-item-name');
+            const priceInput = document.getElementById('add-item-price');
+            
+            const name = nameInput.value.trim();
+            const price = parseFloat(priceInput.value);
+
+            if (!name || isNaN(price) || price < 0) {
+                showToast('กรุณากรอกชื่อสินค้าและราคาที่ถูกต้อง', 'error');
+                return;
+            }
+
+            tempModalItems.push({ name, price });
+            nameInput.value = '';
+            priceInput.value = '';
+            nameInput.focus();
+            
+            renderModalItems();
+        }
+
+        function removeModalItem(index) {
+            tempModalItems.splice(index, 1);
+            renderModalItems();
+        }
+
+        function renderModalItems() {
+            const listEl = document.getElementById('modal-items-list');
+            listEl.innerHTML = '';
+            
+            if (tempModalItems.length === 0) {
+                listEl.innerHTML = '<div class="text-center text-sm text-gray-400 py-2">ยังไม่มีรายการสินค้า</div>';
+            } else {
+                tempModalItems.forEach((item, index) => {
+                    listEl.innerHTML += `
+                        <div class="flex justify-between items-center bg-white p-2 rounded border border-gray-200">
+                            <span class="text-sm truncate pr-2">${escapeHtml(item.name)}</span>
+                            <div class="flex items-center gap-3 whitespace-nowrap">
+                                <span class="font-medium text-sm">${formatMoney(item.price)} ฿</span>
+                                <button type="button" onclick="removeModalItem(${index})" class="text-red-500 hover:text-red-700"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            calculateModalTotal();
+        }
+
+        function calculateModalTotal() {
+            const discount = parseFloat(document.getElementById('modal-discount').value) || 0;
+            const discountType = document.getElementById('modal-discount-type').value;
+            const total = calculateTotal(tempModalItems, discount, discountType);
+            document.getElementById('modal-total-display').innerText = `${formatMoney(total)} ฿`;
+        }
+
+        async function saveAdminData() {
+            if (!supabaseClient) return;
+
+            const qCode = document.getElementById('modal-queue').value.trim().toUpperCase();
+            const wCode = document.getElementById('modal-work-code').value.trim().toUpperCase();
+
+            if (!qCode || !wCode) {
+                showToast('กรุณากรอกรหัสคิวและรหัสงานให้ครบถ้วน', 'error');
+                return;
+            }
+
+            const discount = parseFloat(document.getElementById('modal-discount').value) || 0;
+            const discountType = document.getElementById('modal-discount-type').value;
+            const discountName = document.getElementById('modal-discount-name').value.trim();
+            const promo = document.getElementById('modal-promo').value.trim().toUpperCase();
+
+            try {
+                let orderId = currentEditingOrderId;
+
+                if (orderId) {
+                    const { error: updateErr } = await supabaseClient
+                        .from('orders')
+                        .update({
+                            work_code: wCode,
+                            discount: discount,
+                            discount_type: discountType,
+                            discount_name: discountName,
+                            promo_code_next: promo
+                        })
+                        .eq('id', orderId);
+
+                    if (updateErr) throw updateErr;
+
+                    await supabaseClient.from('order_items').delete().eq('order_id', orderId);
+                    if (tempModalItems.length > 0) {
+                        const itemsToInsert = tempModalItems.map(i => ({
+                            order_id: orderId,
+                            name: i.name,
+                            price: i.price
+                        }));
+                        const { error: itemErr } = await supabaseClient.from('order_items').insert(itemsToInsert);
+                        if (itemErr) throw itemErr;
+                    }
+                } else {
+                    const { data: newOrder, error: insertErr } = await supabaseClient
+                        .from('orders')
+                        .insert({
+                            queue_code: qCode,
+                            work_code: wCode,
+                            discount: discount,
+                            discount_type: discountType,
+                            discount_name: discountName,
+                            promo_code_next: promo,
+                            status: 'pending'
+                        })
+                        .select()
+                        .single();
+
+                    if (insertErr) throw insertErr;
+
+                    if (tempModalItems.length > 0) {
+                        const itemsToInsert = tempModalItems.map(i => ({
+                            order_id: newOrder.id,
+                            name: i.name,
+                            price: i.price
+                        }));
+                        const { error: itemErr } = await supabaseClient.from('order_items').insert(itemsToInsert);
+                        if (itemErr) throw itemErr;
+                    }
+                }
+
+                showToast('บันทึกข้อมูลเรียบร้อย', 'success');
+                closeAdminModal();
+                renderAdminList();
+            } catch (err) {
+                console.error(err);
+                showToast('บันทึกข้อมูลไม่สำเร็จ', 'error');
+            }
+        }
+
+        async function openSlipModal(orderId) {
+            currentReviewingOrderId = orderId;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('orders')
+                    .select('*, order_items(*)')
+                    .eq('id', orderId)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('slip-modal-queue').innerText = data.queue_code;
+                document.getElementById('slip-modal-amount').innerText = formatMoney(calculateTotal(data.order_items || [], data.discount, data.discount_type || 'amount'));
+                
+                const img = document.getElementById('slip-modal-img');
+                img.src = data.slip_image || '';
+                img.classList.remove('scale-150');
+                
+                document.getElementById('slip-modal').classList.remove('hidden');
+            } catch (e) {
+                showToast('ไม่สามารถโหลดข้อมูลสลิปได้', 'error');
+            }
+        }
+
+        function closeSlipModal() {
+            document.getElementById('slip-modal').classList.add('hidden');
+            currentReviewingOrderId = null;
+        }
+
+        let pendingConfirmCallback = null;
+        function showConfirmModal(title, text, callback) {
+            document.getElementById('confirm-title').innerText = title;
+            document.getElementById('confirm-text').innerText = text;
+            pendingConfirmCallback = callback;
+            document.getElementById('confirm-modal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.add('hidden');
+            pendingConfirmCallback = null;
+        }
+
+        function executeConfirm() {
+            if (pendingConfirmCallback) pendingConfirmCallback();
+            closeConfirmModal();
+        }
+
+        async function rejectSlip() {
+            if (!currentReviewingOrderId || !supabaseClient) return;
+            
+            showConfirmModal('ยืนยันการปฏิเสธสลิป', 'คุณต้องการปฏิเสธสลิปนี้และให้ลูกค้าส่งใหม่ใช่หรือไม่?', async () => {
+                try {
+                    const { error } = await supabaseClient
+                        .from('orders')
+                        .update({
+                            status: 'pending',
+                            slip_image: null,
+                            slip_rejected: true
+                        })
+                        .eq('id', currentReviewingOrderId);
+
+                    if (error) throw error;
+
+                    showToast('แจ้งเตือนให้ลูกค้าส่งสลิปใหม่แล้ว', 'success');
+                    closeSlipModal();
+                    renderAdminList();
+                } catch (e) {
+                    console.error(e);
+                    showToast('ดำเนินการไม่สำเร็จ', 'error');
+                }
+            });
+        }
+
+        async function approvePayment() {
+            if (!currentReviewingOrderId || !supabaseClient) return;
+            
+            try {
+                const { error } = await supabaseClient
+                    .from('orders')
+                    .update({
+                        status: 'approved',
+                        timestamp: new Date().toISOString()
+                    })
+                    .eq('id', currentReviewingOrderId);
+
+                if (error) throw error;
+
+                showToast('ยืนยันยอดเงินสำเร็จ', 'success');
+                closeSlipModal();
+                renderAdminList();
+            } catch (e) {
+                console.error(e);
+                showToast('ดำเนินการไม่สำเร็จ', 'error');
+            }
+        }
+
+        document.getElementById('queue-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loginCustomer();
+            }
+        });
+
+        document.getElementById('admin-login-password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitAdminLogin();
+            }
+        });
+
+        document.getElementById('admin-login-email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('admin-login-password').focus();
+            }
+        });
+    </script>
 </body>
 </html>
