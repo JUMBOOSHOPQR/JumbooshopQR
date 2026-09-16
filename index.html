@@ -9,6 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -43,7 +46,6 @@
             position: relative;
         }
         
-        /* Playful background shapes */
         .shape-1 { position: fixed; top: -50px; left: -50px; width: 200px; height: 200px; background-color: #FDE047; border-radius: 50%; opacity: 0.6; z-index: -1; }
         .shape-2 { position: fixed; bottom: 10%; right: -80px; width: 250px; height: 250px; background-color: #FEF08A; border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; opacity: 0.7; z-index: -1; animation: morph 8s ease-in-out infinite alternate; }
         .shape-3 { position: fixed; top: 30%; left: 80%; width: 100px; height: 100px; background-color: #FACC15; border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%; opacity: 0.5; z-index: -1; }
@@ -75,7 +77,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #FEF9C3; }
         ::-webkit-scrollbar-thumb { background: #FACC15; border-radius: 10px; }
@@ -110,7 +111,6 @@
             box-shadow: 4px 4px 0px 0px rgba(31, 41, 55, 1);
         }
 
-        /* Thermal Printer Receipt Animation & Styling */
         .receipt-container {
             background: #ffffff;
             position: relative;
@@ -137,7 +137,6 @@
             }
         }
 
-        /* Jagged bottom edge for thermal receipt */
         .receipt-jagged-edge {
             position: absolute;
             bottom: -10px;
@@ -149,7 +148,6 @@
             background-repeat: repeat-x;
         }
 
-        /* Toast Notification */
         #toast-container {
             position: fixed;
             top: 20px;
@@ -182,10 +180,8 @@
     <div class="shape-2 print:hidden"></div>
     <div class="shape-3 print:hidden"></div>
 
-    <!-- Toast Notifications -->
     <div id="toast-container" class="print:hidden"></div>
 
-    <!-- Header -->
     <header class="p-4 flex justify-between items-center sticky top-0 bg-yellow-100/90 backdrop-blur-sm z-40 border-b-2 border-dark/10 print:hidden">
         <div class="flex items-center gap-2 cursor-pointer" onclick="switchView('home-view')">
             <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-dark">
@@ -198,7 +194,6 @@
                 <i class="fa-solid fa-lock text-yellow-400"></i> ผู้ดูแลระบบ
             </button>
             <div id="header-user-info" class="font-medium bg-white px-4 py-1 rounded-full border-2 border-dark hidden">
-                <!-- User info injected here -->
             </div>
         </div>
     </header>
@@ -233,7 +228,6 @@
                 </div>
             </div>
 
-            <!-- ช่องทางการติดต่อ -->
             <div class="mt-8 flex flex-col items-center view-section">
                 <p class="text-sm font-bold text-gray-600 mb-3">พบปัญหาหรือมีข้อสงสัย? ติดต่อเรา</p>
                 <div class="flex gap-4">
@@ -242,7 +236,6 @@
                     </a>
                 </div>
             </div>
-            
         </div>
 
         <!-- View 3: Customer Dashboard -->
@@ -253,7 +246,6 @@
 
             <!-- State A: Pending Payment -->
             <div id="cust-state-pending" class="hidden">
-                <!-- Rejection Alert -->
                 <div id="cust-reject-alert" class="hidden bg-red-100 border-2 border-red-500 text-red-700 p-4 rounded-xl mb-6 font-bold flex items-center gap-3 shadow-[2px_2px_0px_0px_rgba(239,68,68,1)] view-section">
                     <div class="flex-shrink-0 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center border-2 border-dark">
                         <i class="fa-solid fa-triangle-exclamation text-white"></i>
@@ -273,7 +265,6 @@
                     </div>
                     
                     <div id="cust-items-list" class="space-y-3 mb-4 min-h-[100px]">
-                        <!-- Items injected via JS -->
                     </div>
 
                     <div class="bg-gray-50 p-4 rounded-xl border-2 border-dark/10 space-y-2">
@@ -317,7 +308,7 @@
                 </div>
             </div>
 
-            <!-- State B: Reviewing (Waiting for Admin) -->
+            <!-- State B: Reviewing -->
             <div id="cust-state-reviewing" class="hidden text-center card-style p-10 flex flex-col items-center justify-center gap-6 mt-10">
                 <div class="w-24 h-24 relative">
                     <div class="absolute inset-0 bg-yellow-400 rounded-full animate-ping opacity-20"></div>
@@ -339,42 +330,34 @@
                 </div>
             </div>
 
-            <!-- State C: Approved (Thermal Receipt Machine Style) -->
+            <!-- State C: Approved Receipt -->
             <div id="cust-state-receipt" class="hidden flex flex-col items-center">
-                <!-- Receipt Printer Slot Graphic -->
                 <div class="receipt-machine-slot w-48 h-5 bg-gradient-to-b from-gray-300 to-gray-400 rounded-t-lg border-2 border-dark/30 shadow-inner mb-[-2px] relative z-10 flex items-center justify-center">
                     <div class="w-32 h-1.5 bg-dark/80 rounded-full"></div>
                 </div>
 
-                <!-- Thermal Paper Receipt -->
                 <div class="receipt-container w-full max-w-sm px-6 pt-8 pb-12 rounded-b-lg border-x-2 border-b-2 border-dark/20 text-dark relative overflow-hidden">
-                    
-                    <!-- Header -->
                     <div class="text-center pb-4 mb-4 border-b-2 border-dashed border-gray-300">
                         <h2 class="text-2xl font-bold tracking-widest uppercase">JUMBOOSHOP</h2>
                         <p class="text-xs text-gray-500 font-mono mt-1">RECEIPT / ใบเสร็จรับเงิน</p>
                         <p id="receipt-date" class="text-xs text-gray-500 font-mono mt-0.5"></p>
                     </div>
 
-                    <!-- Work Status Code Badge -->
                     <div class="bg-gray-100 border border-gray-300 rounded-lg p-3 text-center mb-6">
                         <p class="text-xs text-gray-500 mb-0.5 font-medium">รหัสเช็คสถานะงาน</p>
                         <p id="receipt-work-code" class="text-2xl font-mono font-bold tracking-widest text-yellow-600">JB0001-Q</p>
                         <p class="text-[11px] text-gray-500 mt-1">รหัสคิวลูกค้า: <span id="receipt-queue" class="font-bold text-dark"></span></p>
                     </div>
 
-                    <!-- Items Table -->
                     <div class="mb-6">
                         <div class="flex justify-between text-xs font-bold text-gray-500 uppercase border-b border-gray-300 pb-1 mb-2">
                             <span>Description</span>
                             <span>Price</span>
                         </div>
                         <div id="receipt-items" class="space-y-2 text-sm">
-                            <!-- Items injected -->
                         </div>
                     </div>
 
-                    <!-- Totals Section -->
                     <div class="border-t border-dashed border-gray-300 pt-4 space-y-2 text-sm mb-6 font-mono">
                         <div class="flex justify-between text-gray-600">
                             <span>Subtotal</span>
@@ -390,7 +373,6 @@
                         </div>
                     </div>
 
-                    <!-- Promo Code Next Time -->
                     <div id="receipt-promo-box" class="bg-yellow-50 border border-yellow-300 rounded-lg p-3 text-center mb-6">
                         <p class="text-xs font-bold text-yellow-800 mb-1"><i class="fa-solid fa-gift mr-1"></i> โค้ดส่วนลดครั้งถัดไป</p>
                         <p id="receipt-promo-code" class="text-xl font-mono font-bold text-dark bg-white py-1.5 rounded border border-dashed border-yellow-400 mb-2"></p>
@@ -400,7 +382,6 @@
                         </div>
                     </div>
 
-                    <!-- Jagged bottom edge for paper effect -->
                     <div class="receipt-jagged-edge"></div>
                 </div>
                 
@@ -429,7 +410,6 @@
                 </div>
             </div>
 
-            <!-- Search and Filter -->
             <div class="card-style p-4 mb-6 flex gap-4 bg-white/80 backdrop-blur">
                 <div class="relative flex-1">
                     <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
@@ -443,9 +423,7 @@
                 </select>
             </div>
 
-            <!-- List -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="admin-list">
-                <!-- Cards injected via JS -->
             </div>
         </div>
 
@@ -475,8 +453,6 @@
 
                 <div class="border-t-2 border-gray-100 pt-4">
                     <label class="block text-sm font-semibold mb-2">รายการสินค้า</label>
-                    
-                    <!-- Add Item Form -->
                     <div class="flex gap-2 mb-4">
                         <input type="text" id="add-item-name" class="flex-1 p-2 border-2 border-gray-300 rounded-lg focus:border-dark text-sm" placeholder="ชื่อสินค้า">
                         <input type="number" id="add-item-price" class="w-24 p-2 border-2 border-gray-300 rounded-lg focus:border-dark text-sm" placeholder="ราคา">
@@ -485,9 +461,7 @@
                         </button>
                     </div>
 
-                    <!-- Items List -->
                     <div id="modal-items-list" class="space-y-2 bg-gray-50 p-3 rounded-lg min-h-[50px] border border-gray-200">
-                        <!-- JS injected -->
                     </div>
                 </div>
 
@@ -565,13 +539,19 @@
                 </button>
             </div>
             <div class="p-6 space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold mb-2">รหัสผ่าน (รหัส: 1234)</label>
-                    <input type="password" id="admin-login-password" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-center text-xl tracking-widest" placeholder="****">
+                <div id="admin-login-form-div" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">อีเมลแอดมิน</label>
+                        <input type="email" id="admin-login-email" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-sm" placeholder="admin@jumbooshop.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold mb-1">รหัสผ่าน Supabase Auth</label>
+                        <input type="password" id="admin-login-password" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-sm" placeholder="••••••••">
+                    </div>
+                    <button onclick="submitAdminLogin()" class="w-full btn-primary p-3 rounded-xl font-bold">
+                        เข้าสู่ระบบ
+                    </button>
                 </div>
-                <button onclick="submitAdminLogin()" class="w-full btn-primary p-3 rounded-xl font-bold">
-                    เข้าสู่ระบบ
-                </button>
                 <button onclick="closeAdminLogin()" class="w-full bg-gray-100 hover:bg-gray-200 text-dark p-3 rounded-xl font-bold border-2 border-gray-300 transition-colors mt-2">
                     <i class="fa-solid fa-arrow-left mr-2"></i> ยกเลิก / กลับ
                 </button>
@@ -595,42 +575,18 @@
     </div>
 
     <script>
-        // --- In-Memory Database Simulation ---
-        let db = {
-            'QR0001-J': {
-                queueCode: 'QR0001-J',
-                workCode: 'JB0001-Q',
-                items: [{ name: 'เสื้อยืดแขนสั้น', price: 250 }, { name: 'กางเกงขาสั้น', price: 300 }],
-                discount: 50,
-                discountType: 'amount',
-                discountName: 'โปรลูกค้าใหม่',
-                promoCodeNext: 'THANKYOU50',
-                status: 'pending',
-                slipImage: null,
-                timestamp: new Date().toISOString()
-            },
-            'QR0002-J': {
-                queueCode: 'QR0002-J',
-                workCode: 'JB0002-Q',
-                items: [{ name: 'หมวกแก๊ป', price: 150 }],
-                discount: 0,
-                discountType: 'amount',
-                discountName: '',
-                promoCodeNext: '',
-                status: 'pending',
-                slipImage: null,
-                timestamp: new Date().toISOString()
-            }
-        };
+        const SUPABASE_URL = 'https://vipwsmfgxgaetbnfrwxl.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpcHdzbWZneGdhZXRibmZyd3hsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1NjY2MTMsImV4cCI6MjEwNTE0MjYxM30.KOG5z78HPLCvxBLr8NaNseIi_eJghcsKwOZs6fqmrXA';
+        
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Current App State
         let currentRole = null;
         let currentQueue = null;
+        let currentOrderId = null;
         let tempModalItems = [];
-        let currentEditingQueue = null;
-        let currentReviewingQueue = null;
+        let currentEditingOrderId = null;
+        let currentReviewingOrderId = null;
 
-        // --- Utility Functions ---
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
@@ -650,7 +606,7 @@
         }
 
         function formatMoney(amount) {
-            return parseFloat(amount).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            return parseFloat(amount || 0).toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
         }
 
         function calculateDiscountAmount(items, discount, discountType = 'amount') {
@@ -667,40 +623,42 @@
             return Math.max(0, subtotal - discountAmount);
         }
 
-        function generateNextWorkCode() {
-            let maxNum = 0;
-            const keys = Object.keys(db);
-            for (const key of keys) {
-                const workCode = db[key].workCode || '';
-                const match = workCode.match(/^JB(\d{4})-Q$/);
-                if (match) {
-                    const num = parseInt(match[1], 10);
-                    if (num > maxNum) {
-                        maxNum = num;
+        async function generateNextWorkCode() {
+            try {
+                const { data, error } = await supabaseClient.from('orders').select('work_code');
+                if (error) throw error;
+                let maxNum = 0;
+                (data || []).forEach(row => {
+                    const match = (row.work_code || '').match(/^JB(\d{4})-Q$/);
+                    if (match) {
+                        const num = parseInt(match[1], 10);
+                        if (num > maxNum) maxNum = num;
                     }
-                }
+                });
+                return `JB${(maxNum + 1).toString().padStart(4, '0')}-Q`;
+            } catch (e) {
+                return 'JB0001-Q';
             }
-            const nextNum = maxNum + 1;
-            return `JB${nextNum.toString().padStart(4, '0')}-Q`;
         }
 
-        function generateNextQueueCode() {
-            let maxNum = 0;
-            const keys = Object.keys(db);
-            for (const key of keys) {
-                const match = key.match(/^QR(\d{4})-J$/);
-                if (match) {
-                    const num = parseInt(match[1], 10);
-                    if (num > maxNum) {
-                        maxNum = num;
+        async function generateNextQueueCode() {
+            try {
+                const { data, error } = await supabaseClient.from('orders').select('queue_code');
+                if (error) throw error;
+                let maxNum = 0;
+                (data || []).forEach(row => {
+                    const match = (row.queue_code || '').match(/^QR(\d{4})-J$/);
+                    if (match) {
+                        const num = parseInt(match[1], 10);
+                        if (num > maxNum) maxNum = num;
                     }
-                }
+                });
+                return `QR${(maxNum + 1).toString().padStart(4, '0')}-J`;
+            } catch (e) {
+                return 'QR0001-J';
             }
-            const nextNum = maxNum + 1;
-            return `QR${nextNum.toString().padStart(4, '0')}-J`;
         }
 
-        // --- Navigation ---
         function switchView(viewId) {
             document.getElementById('home-view').classList.add('hidden');
             document.getElementById('customer-dashboard-view').classList.add('hidden');
@@ -722,8 +680,7 @@
             }
         }
 
-        // --- Customer Logic ---
-        function loginCustomer(overrideQueue = null) {
+        async function loginCustomer(overrideQueue = null) {
             const input = overrideQueue || document.getElementById('queue-input').value.trim().toUpperCase();
             
             if (!input) {
@@ -731,51 +688,65 @@
                 return;
             }
 
-            if (db[input]) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('orders')
+                    .select('*, order_items(*)')
+                    .eq('queue_code', input)
+                    .single();
+
+                if (error || !data) {
+                    showToast('ไม่พบรหัสคิวนี้ในระบบ', 'error');
+                    return;
+                }
+
                 currentRole = 'customer';
                 currentQueue = input;
+                currentOrderId = data.id;
                 document.getElementById('queue-input').value = '';
                 
                 const headerInfo = document.getElementById('header-user-info');
                 headerInfo.innerHTML = `<i class="fa-solid fa-user text-yellow-500 mr-2"></i> คิว: ${currentQueue}`;
                 headerInfo.classList.remove('hidden');
 
-                renderCustomerDashboard();
+                renderCustomerDashboard(data);
                 switchView('customer-dashboard-view');
-            } else {
-                showToast('ไม่พบรหัสคิวนี้ในระบบ', 'error');
+            } catch (err) {
+                showToast('เกิดข้อผิดพลาดในการตรวจสอบคิว', 'error');
             }
         }
 
         function logout() {
             currentQueue = null;
+            currentOrderId = null;
             switchView('home-view');
         }
 
-        function renderCustomerDashboard() {
-            const data = db[currentQueue];
-            if (!data) return;
+        function renderCustomerDashboard(orderData) {
+            if (!orderData) return;
 
             document.getElementById('cust-state-pending').classList.add('hidden');
             document.getElementById('cust-state-reviewing').classList.add('hidden');
             document.getElementById('cust-state-receipt').classList.add('hidden');
 
-            if (data.status === 'pending') {
+            const items = orderData.order_items || [];
+
+            if (orderData.status === 'pending') {
                 document.getElementById('cust-state-pending').classList.remove('hidden');
                 
-                if (data.slipRejected) {
+                if (orderData.slip_rejected) {
                     document.getElementById('cust-reject-alert').classList.remove('hidden');
                 } else {
                     document.getElementById('cust-reject-alert').classList.add('hidden');
                 }
                 
-                document.getElementById('disp-queue-code').innerText = data.queueCode;
+                document.getElementById('disp-queue-code').innerText = orderData.queue_code;
                 
                 const itemsList = document.getElementById('cust-items-list');
                 itemsList.innerHTML = '';
                 let subtotal = 0;
                 
-                data.items.forEach(item => {
+                items.forEach(item => {
                     subtotal += parseFloat(item.price);
                     itemsList.innerHTML += `
                         <div class="flex justify-between items-center text-sm">
@@ -785,18 +756,18 @@
                     `;
                 });
 
-                if(data.items.length === 0) {
+                if(items.length === 0) {
                      itemsList.innerHTML = `<div class="text-center text-gray-400 italic py-4">ยังไม่มีรายการสินค้า</div>`;
                 }
 
-                const discountType = data.discountType || 'amount';
-                const calculatedDiscount = calculateDiscountAmount(data.items, data.discount, discountType);
+                const discountType = orderData.discount_type || 'amount';
+                const calculatedDiscount = calculateDiscountAmount(items, orderData.discount, discountType);
                 const total = Math.max(0, subtotal - calculatedDiscount);
                 
                 document.getElementById('cust-subtotal').innerText = `${formatMoney(subtotal)} ฿`;
                 
-                let discountLabel = data.discountName ? `ส่วนลด (${data.discountName})` : 'ส่วนลด (Discount)';
-                if (discountType === 'percent' && data.discount > 0) discountLabel += ` (${data.discount}%)`;
+                let discountLabel = orderData.discount_name ? `ส่วนลด (${orderData.discount_name})` : 'ส่วนลด (Discount)';
+                if (discountType === 'percent' && orderData.discount > 0) discountLabel += ` (${orderData.discount}%)`;
                 
                 document.getElementById('cust-discount-label').innerText = discountLabel;
                 document.getElementById('cust-discount').innerText = `-${formatMoney(calculatedDiscount)} ฿`;
@@ -804,22 +775,22 @@
 
                 resetUploadArea();
 
-            } else if (data.status === 'reviewing') {
+            } else if (orderData.status === 'reviewing') {
                 document.getElementById('cust-state-reviewing').classList.remove('hidden');
                 
-            } else if (data.status === 'approved') {
+            } else if (orderData.status === 'approved') {
                 document.getElementById('cust-state-receipt').classList.remove('hidden');
                 
-                document.getElementById('receipt-work-code').innerText = data.workCode || 'JB0001-Q';
-                document.getElementById('receipt-queue').innerText = data.queueCode;
+                document.getElementById('receipt-work-code').innerText = orderData.work_code || 'JB0001-Q';
+                document.getElementById('receipt-queue').innerText = orderData.queue_code;
                 
-                const d = new Date(data.timestamp);
+                const d = new Date(orderData.timestamp || orderData.updated_at);
                 document.getElementById('receipt-date').innerText = `${d.toLocaleDateString('th-TH')} ${d.toLocaleTimeString('th-TH')}`;
                 
                 const rItems = document.getElementById('receipt-items');
                 rItems.innerHTML = '';
                 let subtotal = 0;
-                data.items.forEach(item => {
+                items.forEach(item => {
                     subtotal += parseFloat(item.price);
                     rItems.innerHTML += `
                         <div class="flex justify-between text-gray-800">
@@ -829,31 +800,30 @@
                     `;
                 });
 
-                const discountType = data.discountType || 'amount';
-                const calculatedDiscount = calculateDiscountAmount(data.items, data.discount, discountType);
+                const discountType = orderData.discount_type || 'amount';
+                const calculatedDiscount = calculateDiscountAmount(items, orderData.discount, discountType);
                 const total = Math.max(0, subtotal - calculatedDiscount);
                 
                 document.getElementById('receipt-subtotal').innerText = `${formatMoney(subtotal)} ฿`;
                 
-                let rDiscountLabel = data.discountName ? `Discount (${data.discountName}):` : 'Discount:';
-                if (discountType === 'percent' && data.discount > 0) rDiscountLabel += ` (${data.discount}%)`;
+                let rDiscountLabel = orderData.discount_name ? `Discount (${orderData.discount_name}):` : 'Discount:';
+                if (discountType === 'percent' && orderData.discount > 0) rDiscountLabel += ` (${orderData.discount}%)`;
                 
                 document.getElementById('receipt-discount-label').innerText = rDiscountLabel;
                 document.getElementById('receipt-discount').innerText = `-${formatMoney(calculatedDiscount)} ฿`;
                 document.getElementById('receipt-total').innerText = `${formatMoney(total)} ฿`;
 
                 const promoBox = document.getElementById('receipt-promo-box');
-                if (data.promoCodeNext) {
+                if (orderData.promo_code_next) {
                     promoBox.classList.remove('hidden');
-                    document.getElementById('receipt-promo-code').innerText = data.promoCodeNext;
+                    document.getElementById('receipt-promo-code').innerText = orderData.promo_code_next;
                 } else {
                     promoBox.classList.add('hidden');
                 }
             }
         }
 
-        // --- File Upload Handling ---
-        let currentSlipBase64 = null;
+        let currentSlipFile = null;
 
         function previewSlip(event) {
             const file = event.target.files[0];
@@ -864,13 +834,12 @@
                 return;
             }
 
+            currentSlipFile = file;
             const reader = new FileReader();
             reader.onload = function(e) {
-                currentSlipBase64 = e.target.result;
-                
                 document.getElementById('upload-placeholder').classList.add('hidden');
                 const preview = document.getElementById('slip-preview');
-                preview.src = currentSlipBase64;
+                preview.src = e.target.result;
                 preview.classList.remove('hidden');
                 
                 const btn = document.getElementById('btn-submit-slip');
@@ -881,7 +850,7 @@
         }
 
         function resetUploadArea() {
-            currentSlipBase64 = null;
+            currentSlipFile = null;
             document.getElementById('slip-upload').value = '';
             document.getElementById('upload-placeholder').classList.remove('hidden');
             document.getElementById('slip-preview').classList.add('hidden');
@@ -892,33 +861,81 @@
             btn.classList.add('opacity-50', 'cursor-not-allowed');
         }
 
-        function submitSlip() {
-            if (!currentSlipBase64 || !currentQueue) return;
+        async function submitSlip() {
+            if (!currentSlipFile || !currentOrderId) return;
 
-            db[currentQueue].slipImage = currentSlipBase64;
-            db[currentQueue].status = 'reviewing';
-            db[currentQueue].slipRejected = false;
-            
-            showToast('ส่งหลักฐานการโอนเงินสำเร็จ', 'success');
-            renderCustomerDashboard();
+            try {
+                showToast('กำลังอัปโหลดสลิป...', 'info');
+                const fileExt = currentSlipFile.name.split('.').pop();
+                const fileName = `${currentOrderId}_${Date.now()}.${fileExt}`;
+                const filePath = `slips/${fileName}`;
+
+                const { error: uploadError } = await supabaseClient.storage
+                    .from('order-slips')
+                    .upload(filePath, currentSlipFile);
+
+                if (uploadError) throw uploadError;
+
+                const { data: publicURLData } = supabaseClient.storage
+                    .from('order-slips')
+                    .getPublicUrl(filePath);
+
+                const slipUrl = publicURLData.publicUrl;
+
+                const { error: updateError } = await supabaseClient
+                    .from('orders')
+                    .update({
+                        slip_image: slipUrl,
+                        status: 'reviewing',
+                        slip_rejected: false
+                    })
+                    .eq('id', currentOrderId);
+
+                if (updateError) throw updateError;
+
+                showToast('ส่งหลักฐานการโอนเงินสำเร็จ', 'success');
+                loginCustomer(currentQueue);
+            } catch (err) {
+                showToast('อัปโหลดสลิปไม่สำเร็จ: ' + (err.message || ''), 'error');
+            }
         }
 
-        // --- Admin Logic ---
         function checkAdminPassword() {
+            document.getElementById('admin-login-email').value = '';
             document.getElementById('admin-login-password').value = '';
             document.getElementById('admin-login-modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('admin-login-password').focus(), 100);
+            setTimeout(() => document.getElementById('admin-login-email').focus(), 100);
         }
 
         function closeAdminLogin() {
             document.getElementById('admin-login-modal').classList.add('hidden');
         }
 
-        function submitAdminLogin() {
-            const pwd = document.getElementById('admin-login-password').value;
-            if (pwd === '1234') {
+        async function submitAdminLogin() {
+            const email = document.getElementById('admin-login-email').value.trim();
+            const password = document.getElementById('admin-login-password').value;
+
+            if (!email || !password) {
+                showToast('กรุณากรอกอีเมลและรหัสผ่าน', 'error');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+
+                // Verify admin status via is_admin() RPC or admins table
+                const { data: isAdmin, error: adminErr } = await supabaseClient.rpc('is_admin');
+                if (adminErr || !isAdmin) {
+                    await supabaseClient.auth.signOut();
+                    throw new Error('บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ (Admin)');
+                }
+
                 currentRole = 'admin';
-                
                 const headerInfo = document.getElementById('header-user-info');
                 headerInfo.innerHTML = `<i class="fa-solid fa-shield text-dark mr-2"></i> ผู้ดูแลระบบ`;
                 headerInfo.classList.remove('hidden');
@@ -926,82 +943,90 @@
                 closeAdminLogin();
                 switchView('admin-view');
                 renderAdminList();
-            } else {
-                showToast('รหัสผ่านไม่ถูกต้อง', 'error');
-                document.getElementById('admin-login-password').value = '';
-                document.getElementById('admin-login-password').focus();
+                showToast('เข้าสู่ระบบแอดมินสำเร็จ', 'success');
+            } catch (err) {
+                showToast(err.message || 'เข้าสู่ระบบไม่สำเร็จ', 'error');
             }
         }
 
-        function logoutAdmin() {
+        async function logoutAdmin() {
+            await supabaseClient.auth.signOut();
             currentRole = null;
             switchView('home-view');
+            showToast('ออกจากระบบเรียบร้อย', 'info');
         }
 
-        function renderAdminList() {
+        async function renderAdminList() {
             const listEl = document.getElementById('admin-list');
             const searchTerm = document.getElementById('admin-search').value.toLowerCase();
             const filter = document.getElementById('admin-filter').value;
             
-            listEl.innerHTML = '';
-            
-            const sortedKeys = Object.keys(db).sort((a, b) => {
-                return b.localeCompare(a);
-            });
+            listEl.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-gray-500 py-10">กำลังโหลดข้อมูล...</div>`;
 
-            let count = 0;
-
-            sortedKeys.forEach(key => {
-                const data = db[key];
+            try {
+                let query = supabaseClient.from('orders').select('*, order_items(*)').order('created_at', { ascending: false });
                 
-                if (filter !== 'all' && data.status !== filter) return;
-                if (searchTerm && !data.queueCode.toLowerCase().includes(searchTerm)) return;
-
-                count++;
-                
-                let statusBadge, actionBtn;
-                const total = calculateTotal(data.items, data.discount, data.discountType || 'amount');
-
-                if (data.status === 'pending') {
-                    statusBadge = `<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold border border-gray-300"><i class="fa-regular fa-clock"></i> รอชำระ</span>`;
-                    actionBtn = `<button onclick="openAdminModal('${key}')" class="text-blue-600 hover:text-blue-800 p-2"><i class="fa-solid fa-pen-to-square"></i> แก้ไข</button>`;
-                } else if (data.status === 'reviewing') {
-                    statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold border border-yellow-400 animate-pulse"><i class="fa-solid fa-magnifying-glass"></i> ตรวจสลิป</span>`;
-                    actionBtn = `<button onclick="openSlipModal('${key}')" class="bg-yellow-400 text-dark px-3 py-1 rounded shadow-brutal text-sm font-bold hover:-translate-y-0.5 transition-transform">ตรวจสลิป</button>`;
-                } else {
-                    statusBadge = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold border border-green-400"><i class="fa-solid fa-check"></i> เสร็จสิ้น</span>`;
-                    actionBtn = `<button onclick="openAdminModal('${key}')" class="text-gray-500 hover:text-dark p-2" title="ดูข้อมูล"><i class="fa-solid fa-eye"></i></button>`;
+                if (filter !== 'all') {
+                    query = query.eq('status', filter);
                 }
 
-                listEl.innerHTML += `
-                    <div class="card-style p-4 flex flex-col justify-between hover:bg-gray-50 transition-colors">
-                        <div class="flex justify-between items-start mb-3 border-b border-gray-100 pb-2">
-                            <div>
-                                <h4 class="font-bold text-lg leading-none">${data.queueCode}</h4>
-                                <div class="text-xs text-yellow-600 font-semibold mt-1">รหัสงาน: ${data.workCode || '-'}</div>
-                            </div>
-                            ${statusBadge}
-                        </div>
-                        <div class="flex justify-between items-end">
-                            <div>
-                                <div class="text-sm text-gray-500">ยอดสุทธิ</div>
-                                <div class="font-bold text-lg text-dark">${formatMoney(total)} ฿</div>
-                            </div>
-                            <div>
-                                ${actionBtn}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
+                const { data: orders, error } = await query;
+                if (error) throw error;
 
-            if (count === 0) {
-                listEl.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-gray-500 py-10 bg-white/50 rounded-xl border-2 border-dashed border-gray-300">ไม่พบข้อมูล</div>`;
+                listEl.innerHTML = '';
+                let count = 0;
+
+                (orders || []).forEach(order => {
+                    if (searchTerm && !order.queue_code.toLowerCase().includes(searchTerm)) return;
+
+                    count++;
+                    const items = order.order_items || [];
+                    const total = calculateTotal(items, order.discount, order.discount_type || 'amount');
+
+                    let statusBadge, actionBtn;
+                    if (order.status === 'pending') {
+                        statusBadge = `<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold border border-gray-300"><i class="fa-regular fa-clock"></i> รอชำระ</span>`;
+                        actionBtn = `<button onclick="openAdminModal('${order.id}')" class="text-blue-600 hover:text-blue-800 p-2"><i class="fa-solid fa-pen-to-square"></i> แก้ไข</button>`;
+                    } else if (order.status === 'reviewing') {
+                        statusBadge = `<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-bold border border-yellow-400 animate-pulse"><i class="fa-solid fa-magnifying-glass"></i> ตรวจสลิป</span>`;
+                        actionBtn = `<button onclick="openSlipModal('${order.id}')" class="bg-yellow-400 text-dark px-3 py-1 rounded shadow-brutal text-sm font-bold hover:-translate-y-0.5 transition-transform">ตรวจสลิป</button>`;
+                    } else {
+                        statusBadge = `<span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold border border-green-400"><i class="fa-solid fa-check"></i> เสร็จสิ้น</span>`;
+                        actionBtn = `<button onclick="openAdminModal('${order.id}')" class="text-gray-500 hover:text-dark p-2" title="ดูข้อมูล"><i class="fa-solid fa-eye"></i></button>`;
+                    }
+
+                    listEl.innerHTML += `
+                        <div class="card-style p-4 flex flex-col justify-between hover:bg-gray-50 transition-colors">
+                            <div class="flex justify-between items-start mb-3 border-b border-gray-100 pb-2">
+                                <div>
+                                    <h4 class="font-bold text-lg leading-none">${order.queue_code}</h4>
+                                    <div class="text-xs text-yellow-600 font-semibold mt-1">รหัสงาน: ${order.work_code || '-'}</div>
+                                </div>
+                                ${statusBadge}
+                            </div>
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <div class="text-sm text-gray-500">ยอดสุทธิ</div>
+                                    <div class="font-bold text-lg text-dark">${formatMoney(total)} ฿</div>
+                                </div>
+                                <div>
+                                    ${actionBtn}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (count === 0) {
+                    listEl.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-gray-500 py-10 bg-white/50 rounded-xl border-2 border-dashed border-gray-300">ไม่พบข้อมูล</div>`;
+                }
+            } catch (err) {
+                listEl.innerHTML = `<div class="col-span-1 md:col-span-2 text-center text-red-500 py-10">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>`;
             }
         }
 
-        function openAdminModal(queueCode = null) {
-            currentEditingQueue = queueCode;
+        async function openAdminModal(orderId = null) {
+            currentEditingOrderId = orderId;
             tempModalItems = [];
             
             const modal = document.getElementById('admin-modal');
@@ -1015,31 +1040,41 @@
             document.getElementById('add-item-name').value = '';
             document.getElementById('add-item-price').value = '';
 
-            if (queueCode && db[queueCode]) {
-                const data = db[queueCode];
-                title.innerText = `แก้ไขคิว: ${queueCode}`;
-                qInput.value = queueCode;
-                qInput.disabled = true;
-                qInput.classList.add('bg-gray-100');
-                
-                wInput.value = data.workCode || generateNextWorkCode();
-                tempModalItems = [...data.items];
-                dNameInput.value = data.discountName || '';
-                dInput.value = data.discount;
-                document.getElementById('modal-discount-type').value = data.discountType || 'amount';
-                pInput.value = data.promoCodeNext || '';
+            if (orderId) {
+                try {
+                    const { data, error } = await supabaseClient
+                        .from('orders')
+                        .select('*, order_items(*)')
+                        .eq('id', orderId)
+                        .single();
+
+                    if (error) throw error;
+
+                    title.innerText = `แก้ไขคิว: ${data.queue_code}`;
+                    qInput.value = data.queue_code;
+                    qInput.disabled = true;
+                    qInput.classList.add('bg-gray-100');
+                    
+                    wInput.value = data.work_code || '';
+                    tempModalItems = (data.order_items || []).map(i => ({ id: i.id, name: i.name, price: i.price }));
+                    dNameInput.value = data.discount_name || '';
+                    dInput.value = data.discount;
+                    document.getElementById('modal-discount-type').value = data.discount_type || 'amount';
+                    pInput.value = data.promo_code_next || '';
+                } catch (e) {
+                    showToast('ไม่สามารถโหลดข้อมูลคิวได้', 'error');
+                    return;
+                }
             } else {
                 title.innerText = 'สร้างคิวใหม่';
-                qInput.value = '';
                 qInput.disabled = false;
                 qInput.classList.remove('bg-gray-100');
+                qInput.value = await generateNextQueueCode();
+                wInput.value = await generateNextWorkCode();
                 dNameInput.value = '';
                 dInput.value = '0';
                 document.getElementById('modal-discount-type').value = 'amount';
                 pInput.value = '';
-                
-                qInput.value = generateNextQueueCode();
-                wInput.value = generateNextWorkCode();
             }
 
             renderModalItems();
@@ -1048,7 +1083,7 @@
 
         function closeAdminModal() {
             document.getElementById('admin-modal').classList.add('hidden');
-            currentEditingQueue = null;
+            currentEditingOrderId = null;
         }
 
         function addModalItem() {
@@ -1105,21 +1140,12 @@
             document.getElementById('modal-total-display').innerText = `${formatMoney(total)} ฿`;
         }
 
-        function saveAdminData() {
+        async function saveAdminData() {
             const qCode = document.getElementById('modal-queue').value.trim().toUpperCase();
             const wCode = document.getElementById('modal-work-code').value.trim().toUpperCase();
 
-            if (!qCode) {
-                showToast('กรุณาระบุรหัสคิว', 'error');
-                return;
-            }
-            if (!wCode) {
-                showToast('กรุณาระบุรหัสเช็คสถานะงาน', 'error');
-                return;
-            }
-
-            if (!currentEditingQueue && db[qCode]) {
-                showToast('รหัสคิวนี้มีอยู่ในระบบแล้ว', 'error');
+            if (!qCode || !wCode) {
+                showToast('กรุณากรอกรหัสคิวและรหัสงานให้ครบถ้วน', 'error');
                 return;
             }
 
@@ -1128,47 +1154,97 @@
             const discountName = document.getElementById('modal-discount-name').value.trim();
             const promo = document.getElementById('modal-promo').value.trim().toUpperCase();
 
-            if (currentEditingQueue && currentEditingQueue !== qCode) {
-                delete db[currentEditingQueue];
+            try {
+                let orderId = currentEditingOrderId;
+
+                if (orderId) {
+                    const { error: updateErr } = await supabaseClient
+                        .from('orders')
+                        .update({
+                            work_code: wCode,
+                            discount: discount,
+                            discount_type: discountType,
+                            discount_name: discountName,
+                            promo_code_next: promo
+                        })
+                        .eq('id', orderId);
+
+                    if (updateErr) throw updateErr;
+
+                    // Delete old items and insert fresh
+                    await supabaseClient.from('order_items').delete().eq('order_id', orderId);
+                    if (tempModalItems.length > 0) {
+                        const itemsToInsert = tempModalItems.map(i => ({
+                            order_id: orderId,
+                            name: i.name,
+                            price: i.price
+                        }));
+                        const { error: itemErr } = await supabaseClient.from('order_items').insert(itemsToInsert);
+                        if (itemErr) throw itemErr;
+                    }
+                } else {
+                    const { data: newOrder, error: insertErr } = await supabaseClient
+                        .from('orders')
+                        .insert({
+                            queue_code: qCode,
+                            work_code: wCode,
+                            discount: discount,
+                            discount_type: discountType,
+                            discount_name: discountName,
+                            promo_code_next: promo,
+                            status: 'pending'
+                        })
+                        .select()
+                        .single();
+
+                    if (insertErr) throw insertErr;
+
+                    if (tempModalItems.length > 0) {
+                        const itemsToInsert = tempModalItems.map(i => ({
+                            order_id: newOrder.id,
+                            name: i.name,
+                            price: i.price
+                        }));
+                        const { error: itemErr } = await supabaseClient.from('order_items').insert(itemsToInsert);
+                        if (itemErr) throw itemErr;
+                    }
+                }
+
+                showToast('บันทึกข้อมูลเรียบร้อย', 'success');
+                closeAdminModal();
+                renderAdminList();
+            } catch (err) {
+                showToast('บันทึกข้อมูลไม่สำเร็จ: ' + (err.message || ''), 'error');
             }
-
-            const existingData = db[qCode] || {};
-            
-            db[qCode] = {
-                queueCode: qCode,
-                workCode: wCode,
-                items: [...tempModalItems],
-                discount: discount,
-                discountType: discountType,
-                discountName: discountName,
-                promoCodeNext: promo,
-                status: existingData.status || 'pending',
-                slipImage: existingData.slipImage || null,
-                timestamp: existingData.timestamp || new Date().toISOString()
-            };
-
-            showToast('บันทึกข้อมูลเรียบร้อย', 'success');
-            closeAdminModal();
-            renderAdminList();
         }
 
-        function openSlipModal(queueCode) {
-            currentReviewingQueue = queueCode;
-            const data = db[queueCode];
-            
-            document.getElementById('slip-modal-queue').innerText = queueCode;
-            document.getElementById('slip-modal-amount').innerText = formatMoney(calculateTotal(data.items, data.discount, data.discountType || 'amount'));
-            
-            const img = document.getElementById('slip-modal-img');
-            img.src = data.slipImage;
-            img.classList.remove('scale-150');
-            
-            document.getElementById('slip-modal').classList.remove('hidden');
+        async function openSlipModal(orderId) {
+            currentReviewingOrderId = orderId;
+            try {
+                const { data, error } = await supabaseClient
+                    .from('orders')
+                    .select('*, order_items(*)')
+                    .eq('id', orderId)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('slip-modal-queue').innerText = data.queue_code;
+                document.getElementById('slip-modal-amount').innerText = formatMoney(calculateTotal(data.order_items || [], data.discount, data.discount_type || 'amount'));
+                
+                const img = document.getElementById('slip-modal-img');
+                img.src = data.slip_image || '';
+                img.classList.remove('scale-150');
+                
+                document.getElementById('slip-modal').classList.remove('hidden');
+            } catch (e) {
+                showToast('ไม่สามารถโหลดข้อมูลสลิปได้', 'error');
+            }
         }
 
         function closeSlipModal() {
             document.getElementById('slip-modal').classList.add('hidden');
-            currentReviewingQueue = null;
+            currentReviewingOrderId = null;
         }
 
         let pendingConfirmCallback = null;
@@ -1189,29 +1265,51 @@
             closeConfirmModal();
         }
 
-        function rejectSlip() {
-            if (!currentReviewingQueue) return;
+        async function rejectSlip() {
+            if (!currentReviewingOrderId) return;
             
-            showConfirmModal('ยืนยันการปฏิเสธสลิป', 'คุณต้องการปฏิเสธสลิปนี้และให้ลูกค้าส่งใหม่ใช่หรือไม่?', () => {
-                db[currentReviewingQueue].status = 'pending';
-                db[currentReviewingQueue].slipImage = null;
-                db[currentReviewingQueue].slipRejected = true;
-                
-                showToast('แจ้งเตือนให้ลูกค้าส่งสลิปใหม่แล้ว', 'success');
-                closeSlipModal();
-                renderAdminList();
+            showConfirmModal('ยืนยันการปฏิเสธสลิป', 'คุณต้องการปฏิเสธสลิปนี้และให้ลูกค้าส่งใหม่ใช่หรือไม่?', async () => {
+                try {
+                    const { error } = await supabaseClient
+                        .from('orders')
+                        .update({
+                            status: 'pending',
+                            slip_image: null,
+                            slip_rejected: true
+                        })
+                        .eq('id', currentReviewingOrderId);
+
+                    if (error) throw error;
+
+                    showToast('แจ้งเตือนให้ลูกค้าส่งสลิปใหม่แล้ว', 'success');
+                    closeSlipModal();
+                    renderAdminList();
+                } catch (e) {
+                    showToast('ดำเนินการไม่สำเร็จ', 'error');
+                }
             });
         }
 
-        function approvePayment() {
-            if (!currentReviewingQueue) return;
+        async function approvePayment() {
+            if (!currentReviewingOrderId) return;
             
-            db[currentReviewingQueue].status = 'approved';
-            db[currentReviewingQueue].timestamp = new Date().toISOString();
-            
-            showToast('ยืนยันยอดเงินสำเร็จ', 'success');
-            closeSlipModal();
-            renderAdminList();
+            try {
+                const { error } = await supabaseClient
+                    .from('orders')
+                    .update({
+                        status: 'approved',
+                        timestamp: new Date().toISOString()
+                    })
+                    .eq('id', currentReviewingOrderId);
+
+                if (error) throw error;
+
+                showToast('ยืนยันยอดเงินสำเร็จ', 'success');
+                closeSlipModal();
+                renderAdminList();
+            } catch (e) {
+                showToast('ดำเนินการไม่สำเร็จ', 'error');
+            }
         }
 
         document.getElementById('queue-input').addEventListener('keypress', function(e) {
@@ -1225,7 +1323,6 @@
                 submitAdminLogin();
             }
         });
-
     </script>
 </body>
 </html>
