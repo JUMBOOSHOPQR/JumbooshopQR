@@ -541,12 +541,11 @@
             <div class="p-6 space-y-4">
                 <div id="admin-login-form-div" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-semibold mb-1">อีเมลแอดมิน</label>
-                        <input type="email" id="admin-login-email" value="foryoucute6@gmail.com" class="w-full p-3 rounded-xl border-2 border-gray-300 bg-gray-100 font-medium text-sm" readonly>
-                        <p class="text-[11px] text-gray-500 mt-1">ระบบจำกัดสิทธิ์เฉพาะฟอร์ยูคิวต์ (foryoucute6@gmail.com)</p>
+                        <label class="block text-sm font-semibold mb-2">อีเมลแอดมิน</label>
+                        <input type="email" id="admin-login-email" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-sm" placeholder="admin@email.com">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold mb-1">รหัสผ่าน Supabase Auth</label>
+                        <label class="block text-sm font-semibold mb-2">รหัสผ่าน</label>
                         <input type="password" id="admin-login-password" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-sm" placeholder="••••••••">
                     </div>
                     <button onclick="submitAdminLogin()" class="w-full btn-primary p-3 rounded-xl font-bold">
@@ -902,9 +901,10 @@
         }
 
         function checkAdminPassword() {
+            document.getElementById('admin-login-email').value = '';
             document.getElementById('admin-login-password').value = '';
             document.getElementById('admin-login-modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('admin-login-password').focus(), 100);
+            setTimeout(() => document.getElementById('admin-login-email').focus(), 100);
         }
 
         function closeAdminLogin() {
@@ -912,11 +912,16 @@
         }
 
         async function submitAdminLogin() {
-            const email = 'foryoucute6@gmail.com';
+            const email = document.getElementById('admin-login-email').value.trim();
             const password = document.getElementById('admin-login-password').value;
 
-            if (!password) {
-                showToast('กรุณากรอกรหัสผ่าน', 'error');
+            if (!email || !password) {
+                showToast('กรุณากรอกอีเมลและรหัสผ่าน', 'error');
+                return;
+            }
+
+            if (email !== 'foryoucute6@gmail.com') {
+                showToast('ระบบจำกัดสิทธิ์เฉพาะ foryoucute6@gmail.com เท่านั้น', 'error');
                 return;
             }
 
@@ -928,11 +933,10 @@
 
                 if (error) throw error;
 
-                // Verify admin status via is_admin() RPC
                 const { data: isAdmin, error: adminErr } = await supabaseClient.rpc('is_admin');
                 if (adminErr || !isAdmin) {
                     await supabaseClient.auth.signOut();
-                    throw new Error('บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ (อนุญาตเฉพาะ foryoucute6@gmail.com เท่านั้น)');
+                    throw new Error('บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบในฐานข้อมูล Supabase');
                 }
 
                 currentRole = 'admin';
@@ -1303,7 +1307,6 @@
 
                 if (error) throw error;
 
-                showTool('ยืนยันยอดเงินสำเร็จ', 'success');
                 showToast('ยืนยันยอดเงินสำเร็จ', 'success');
                 closeSlipModal();
                 renderAdminList();
@@ -1321,6 +1324,12 @@
         document.getElementById('admin-login-password').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 submitAdminLogin();
+            }
+        });
+
+        document.getElementById('admin-login-email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('admin-login-password').focus();
             }
         });
     </script>
