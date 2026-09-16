@@ -542,7 +542,8 @@
                 <div id="admin-login-form-div" class="space-y-4">
                     <div>
                         <label class="block text-sm font-semibold mb-1">อีเมลแอดมิน</label>
-                        <input type="email" id="admin-login-email" class="w-full p-3 rounded-xl border-2 border-gray-300 focus:border-dark focus:outline-none text-sm" placeholder="admin@jumbooshop.com">
+                        <input type="email" id="admin-login-email" value="foryoucute6@gmail.com" class="w-full p-3 rounded-xl border-2 border-gray-300 bg-gray-100 font-medium text-sm" readonly>
+                        <p class="text-[11px] text-gray-500 mt-1">ระบบจำกัดสิทธิ์เฉพาะฟอร์ยูคิวต์ (foryoucute6@gmail.com)</p>
                     </div>
                     <div>
                         <label class="block text-sm font-semibold mb-1">รหัสผ่าน Supabase Auth</label>
@@ -901,10 +902,9 @@
         }
 
         function checkAdminPassword() {
-            document.getElementById('admin-login-email').value = '';
             document.getElementById('admin-login-password').value = '';
             document.getElementById('admin-login-modal').classList.remove('hidden');
-            setTimeout(() => document.getElementById('admin-login-email').focus(), 100);
+            setTimeout(() => document.getElementById('admin-login-password').focus(), 100);
         }
 
         function closeAdminLogin() {
@@ -912,11 +912,11 @@
         }
 
         async function submitAdminLogin() {
-            const email = document.getElementById('admin-login-email').value.trim();
+            const email = 'foryoucute6@gmail.com';
             const password = document.getElementById('admin-login-password').value;
 
-            if (!email || !password) {
-                showToast('กรุณากรอกอีเมลและรหัสผ่าน', 'error');
+            if (!password) {
+                showToast('กรุณากรอกรหัสผ่าน', 'error');
                 return;
             }
 
@@ -928,11 +928,11 @@
 
                 if (error) throw error;
 
-                // Verify admin status via is_admin() RPC or admins table
+                // Verify admin status via is_admin() RPC
                 const { data: isAdmin, error: adminErr } = await supabaseClient.rpc('is_admin');
                 if (adminErr || !isAdmin) {
                     await supabaseClient.auth.signOut();
-                    throw new Error('บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ (Admin)');
+                    throw new Error('บัญชีนี้ไม่มีสิทธิ์ผู้ดูแลระบบ (อนุญาตเฉพาะ foryoucute6@gmail.com เท่านั้น)');
                 }
 
                 currentRole = 'admin';
@@ -1171,7 +1171,6 @@
 
                     if (updateErr) throw updateErr;
 
-                    // Delete old items and insert fresh
                     await supabaseClient.from('order_items').delete().eq('order_id', orderId);
                     if (tempModalItems.length > 0) {
                         const itemsToInsert = tempModalItems.map(i => ({
@@ -1304,6 +1303,7 @@
 
                 if (error) throw error;
 
+                showTool('ยืนยันยอดเงินสำเร็จ', 'success');
                 showToast('ยืนยันยอดเงินสำเร็จ', 'success');
                 closeSlipModal();
                 renderAdminList();
