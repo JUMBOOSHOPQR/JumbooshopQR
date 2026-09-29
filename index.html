@@ -210,24 +210,6 @@
 </head>
 <body class="min-h-screen flex flex-col justify-center items-center p-4">
 
-    <!-- เสียง BGM -->
-    <audio id="bgm" src="Sunlight_On_The_Threshold.mp3" loop preload="auto"></audio>
-
-    <!-- ปุ่มเปิด/ปิดเพลง (มุมขวาล่าง) -->
-    <div class="fixed bottom-4 right-4 z-50">
-        <button id="bgm-toggle-btn" onclick="toggleBGM(event)" class="w-10 h-10 bg-white/50 backdrop-blur rounded-full flex items-center justify-center shadow-sm text-gray-500 hover:text-[#583E34] hover:bg-white transition-all" title="เปิด/ปิดเพลง">
-            <!-- ไอคอนลำโพงปิด (ค่าเริ่มต้นก่อนเริ่มเล่น) -->
-            <svg id="icon-vol-mute" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>
-            </svg>
-            <!-- ไอคอนลำโพงเปิด -->
-            <svg id="icon-vol-up" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
-            </svg>
-        </button>
-    </div>
-
     <!-- UI พื้นหลัง (Snow) จะถูกสร้างด้วย JS -->
     <div id="snow-container"></div>
 
@@ -313,7 +295,18 @@
         </div>
 
         <!-- Upload Slip Section -->
-        <div id="upload-section" class="hidden">
+        <div id="upload-section" class="hidden space-y-4">
+            
+            <!-- กรอบแสดง QR Code แอดมิน -->
+            <div id="payment-qr-container" class="p-4 border-2 border-dashed border-[#F9CB65] rounded-2xl bg-[#fff9eb] text-center shadow-sm">
+                <p class="text-sm font-bold text-[#583E34] mb-3">สแกน QR Code เพื่อชำระเงิน</p>
+                <div class="w-48 h-48 mx-auto bg-white rounded-xl border border-[#ecdac9] flex items-center justify-center overflow-hidden mb-2 p-2">
+                    <img id="payment-qr-img" src="" alt="QR Code" class="max-w-full max-h-full object-contain hidden">
+                    <span id="payment-qr-placeholder" class="text-xs text-gray-400">ร้านค้ายังไม่ได้ตั้งค่า QR Code</span>
+                </div>
+                <p class="text-[10px] text-gray-500">บันทึกรูป QR Code เพื่อสแกนในแอปธนาคาร</p>
+            </div>
+
             <label class="block text-center p-6 border-2 border-dashed border-[#ecdac9] rounded-2xl cursor-pointer hover:border-[#F9CB65] transition-colors bg-white">
                 <input type="file" id="slip-upload" class="hidden" accept="image/png, image/jpeg, image/webp" onchange="handleFileSelect(event)">
                 <div id="upload-placeholder">
@@ -474,6 +467,7 @@
                     <span id="slip-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center hidden">0</span>
                 </button>
                 <button type="button" onclick="switchAdminTab('add')" id="tab-add" class="px-4 py-2 text-sm whitespace-nowrap rounded-full bg-gray-100 hover:bg-gray-200">สร้างคิวใหม่</button>
+                <button type="button" onclick="switchAdminTab('settings')" id="tab-settings" class="px-4 py-2 text-sm whitespace-nowrap rounded-full bg-gray-100 hover:bg-gray-200">ตั้งค่าร้าน</button>
                 <button type="button" onclick="backToShop()" class="px-4 py-2 text-sm whitespace-nowrap rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 ml-auto md:ml-2">หน้าร้าน</button>
                 <button type="button" onclick="logout()" class="px-4 py-2 text-sm whitespace-nowrap rounded-full bg-red-100 text-red-600 hover:bg-red-200">ออกจากระบบ</button>
             </div>
@@ -571,6 +565,35 @@
                 </div>
             </form>
         </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="admin-settings" class="hidden max-w-md mx-auto">
+            <div class="border rounded-2xl p-6 bg-white shadow-sm border-[#ecdac9]">
+                <div class="flex items-center mb-4">
+                    <div class="w-8 h-8 bg-[#F9CB65] rounded-full flex items-center justify-center text-white mr-3 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
+                    </div>
+                    <h3 class="text-lg font-bold text-[#583E34]">ตั้งค่า QR Code รับเงิน</h3>
+                </div>
+                
+                <label class="block text-center p-6 border-2 border-dashed border-[#ecdac9] rounded-2xl cursor-pointer hover:border-[#F9CB65] transition-colors bg-gray-50 mb-4">
+                    <input type="file" id="admin-qr-upload" class="hidden" accept="image/png, image/jpeg, image/webp" onchange="handleAdminQRSelect(event)">
+                    <div id="admin-qr-preview-container" class="hidden mb-2">
+                        <img id="admin-qr-preview" src="" class="mx-auto max-h-48 rounded-xl object-contain shadow-sm">
+                        <span class="text-xs text-gray-500 block mt-3">แตะเพื่อเปลี่ยนรูปใหม่</span>
+                    </div>
+                    <div id="admin-qr-placeholder">
+                        <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                        </svg>
+                        <span class="text-sm font-medium text-gray-500">อัปโหลดรูป QR Code ของร้าน</span>
+                        <p class="text-xs text-gray-400 mt-1">(ไฟล์รูปภาพเท่านั้น)</p>
+                    </div>
+                </label>
+                <button type="button" onclick="saveAdminQR()" id="btn-save-qr" class="btn-primary w-full py-3 shadow-md">บันทึก QR Code</button>
+            </div>
+        </div>
+
     </div>
 
     <!-- Script หลัก -->
@@ -590,6 +613,7 @@
         let currentQueue = null;
         let selectedFileBlob = null;
         let adminTimer = null; 
+        let adminQRBase64 = null;
 
         // ==========================================
         // ระบบแจ้งเตือน Custom
@@ -629,7 +653,6 @@
         // ==========================================
         // เอฟเฟกต์ & เสียง
         // ==========================================
-        let bgmStarted = false;
         let synth = null;
         
         try {
@@ -663,55 +686,11 @@
             } catch(e) {}
         }
 
-        let bgmUserToggled = false;
-        let isBgmPlaying = false;
-
-        function toggleBGM(e) {
-            if(e) e.stopPropagation(); // ป้องกันไม่ให้เผลอไปกดโดน document click
-            const bgm = document.getElementById('bgm');
-            const iconMute = document.getElementById('icon-vol-mute');
-            const iconUp = document.getElementById('icon-vol-up');
-            if(!bgm) return;
-            
-            bgmUserToggled = true; // จำไว้ว่าผู้ใช้ตั้งใจกดปุ่มนี้เอง
-
-            if (isBgmPlaying) {
-                bgm.pause();
-                isBgmPlaying = false;
-                if(iconUp) iconUp.classList.add('hidden');
-                if(iconMute) iconMute.classList.remove('hidden');
-            } else {
-                bgm.volume = 0.15;
-                bgm.play().then(() => {
-                    isBgmPlaying = true;
-                    if(iconMute) iconMute.classList.add('hidden');
-                    if(iconUp) iconUp.classList.remove('hidden');
-                }).catch(err => console.log('BGM blocked'));
-            }
-        }
-
-        function initBGM() {
-            if (bgmStarted || bgmUserToggled) return; // ไม่รันถ้าลูกค้าเคยกดปุ่มตั้งค่าเองแล้ว
-            const bgm = document.getElementById('bgm');
-            if(bgm) {
-                bgm.volume = 0.15;
-                bgm.play().then(() => { 
-                    bgmStarted = true; 
-                    isBgmPlaying = true;
-                    const iconMute = document.getElementById('icon-vol-mute');
-                    const iconUp = document.getElementById('icon-vol-up');
-                    if(iconMute) iconMute.classList.add('hidden');
-                    if(iconUp) iconUp.classList.remove('hidden');
-                }).catch(e => { /* Ignore */ });
-            }
-        }
-
         document.addEventListener('mousemove', (e) => {
             if(Math.random() > 0.1) return; 
             createShape(e.clientX, e.clientY, 'trail');
         });
         document.addEventListener('click', (e) => {
-            initBGM();
             if(e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('#rcpt-next-code-box')) playClickSound();
             for(let i=0; i<5; i++) createShape(e.clientX, e.clientY, 'burst');
         });
@@ -770,6 +749,18 @@
                     showReceipt(data);
                 } else {
                     document.getElementById('result-view').classList.remove('hidden');
+                    
+                    // ดึงรูป QR Code ของร้านมาแสดงในหน้ารอชำระเงิน
+                    if (data.status === 'pending') {
+                        try {
+                            const { data: qrData } = await supabaseClient.from('store_settings').select('value').eq('key', 'payment_qr').single();
+                            if (qrData && qrData.value) {
+                                document.getElementById('payment-qr-img').src = qrData.value;
+                                document.getElementById('payment-qr-img').classList.remove('hidden');
+                                document.getElementById('payment-qr-placeholder').classList.add('hidden');
+                            }
+                        } catch(e) { console.log('QR Code not set'); }
+                    }
                 }
 
             } catch (err) {
@@ -1125,18 +1116,29 @@
         }
 
         function switchAdminTab(tab) {
-            ['list', 'slips', 'add'].forEach(t => {
-                document.getElementById(`admin-${t}`).classList.add('hidden');
-                document.getElementById(`tab-${t}`).classList.replace('bg-[#F9CB65]', 'bg-gray-100');
-                if(t==='list') document.getElementById(`tab-${t}`).classList.remove('text-white');
+            ['list', 'slips', 'add', 'settings'].forEach(t => {
+                const adminTab = document.getElementById(`admin-${t}`);
+                const tabBtn = document.getElementById(`tab-${t}`);
+                if (adminTab) adminTab.classList.add('hidden');
+                if (tabBtn) {
+                    tabBtn.classList.replace('bg-[#F9CB65]', 'bg-gray-100');
+                    if(t==='list') tabBtn.classList.remove('text-white');
+                }
             });
-            document.getElementById(`admin-${tab}`).classList.remove('hidden');
-            const btn = document.getElementById(`tab-${tab}`);
-            btn.classList.replace('bg-gray-100', 'bg-[#F9CB65]');
-            if(tab==='list') btn.classList.add('text-white');
+            
+            const targetAdminTab = document.getElementById(`admin-${tab}`);
+            const targetTabBtn = document.getElementById(`tab-${tab}`);
+            
+            if (targetAdminTab) targetAdminTab.classList.remove('hidden');
+            if (targetTabBtn) {
+                targetTabBtn.classList.replace('bg-gray-100', 'bg-[#F9CB65]');
+                if(tab === 'list') targetTabBtn.classList.add('text-white');
+            }
 
             if(tab === 'add') {
                 if(document.getElementById('form-mode').value === 'add') generateAutoID();
+            } else if (tab === 'settings') {
+                loadAdminQR();
             }
         }
 
@@ -1366,6 +1368,82 @@
                 resetForm(); loadAdminData();
             } catch (err) { showCustomAlert('เกิดข้อผิดพลาดในการบันทึกข้อมูล');
             } finally { if(btn) { btn.innerHTML = 'บันทึกข้อมูล'; btn.disabled = false; } }
+        }
+
+        // ==========================================
+        // ตั้งค่าร้าน (Admin Settings - QR Code)
+        // ==========================================
+        async function loadAdminQR() {
+            try {
+                const { data } = await supabaseClient.from('store_settings').select('value').eq('key', 'payment_qr').single();
+                if (data && data.value) {
+                    adminQRBase64 = data.value;
+                    document.getElementById('admin-qr-preview').src = data.value;
+                    document.getElementById('admin-qr-preview-container').classList.remove('hidden');
+                    document.getElementById('admin-qr-placeholder').classList.add('hidden');
+                }
+            } catch (err) { /* ไม่พบข้อมูลยังไม่ต้องทำอะไร */ }
+        }
+
+        function handleAdminQRSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if(!file.type.startsWith('image/')) {
+                showCustomAlert('กรุณาเลือกไฟล์รูปภาพเท่านั้น');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    let width = img.width;
+                    let height = img.height;
+                    const max = 600; 
+
+                    if (width > height && width > max) { height *= max / width; width = max; }
+                    else if (height > max) { width *= max / height; height = max; }
+                    
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    adminQRBase64 = canvas.toDataURL('image/jpeg', 0.85); // บีบอัดภาพเพื่อเก็บลง DB
+                    document.getElementById('admin-qr-preview').src = adminQRBase64;
+                    document.getElementById('admin-qr-preview-container').classList.remove('hidden');
+                    document.getElementById('admin-qr-placeholder').classList.add('hidden');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function saveAdminQR() {
+            if (!adminQRBase64) {
+                showCustomAlert('กรุณาเลือกรูป QR Code ก่อนบันทึก');
+                return;
+            }
+            
+            const btn = document.getElementById('btn-save-qr');
+            btn.innerHTML = '<div class="loading-spinner"></div>...';
+            btn.disabled = true;
+
+            try {
+                // อัปเดตข้อมูลแบบ Upsert (เพิ่มถ้ายังไม่มี / แก้ไขถ้ามีแล้ว)
+                const { error } = await supabaseClient.from('store_settings').upsert([
+                    { key: 'payment_qr', value: adminQRBase64, updated_at: new Date().toISOString() }
+                ]);
+                
+                if (error) throw error;
+                showCustomAlert('บันทึก QR Code รับเงินเรียบร้อยแล้ว');
+            } catch (err) {
+                showCustomAlert('เกิดข้อผิดพลาดในการบันทึก QR Code');
+            } finally {
+                btn.innerHTML = 'บันทึก QR Code';
+                btn.disabled = false;
+            }
         }
 
         // Initialize UI
