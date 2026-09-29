@@ -603,7 +603,13 @@
         // ==========================================
         const SUPABASE_URL = 'https://wxcwdsruxiivatsstvhx.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind4Y3dkc3J1eGlpdmF0c3N0dmh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAyMzgyMjIsImV4cCI6MjEwNTgxNDIyMn0.buwWJXgzpkVft8W57hJYYhn4boWADBj63Tx_ocPjI5c';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        
+        let supabaseClient;
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        } else {
+            console.error('Supabase library failed to load.');
+        }
 
         function escapeHTML(str) {
             if (!str) return '';
@@ -733,6 +739,7 @@
             const qid = escapeHTML(document.getElementById('search-input').value.trim().toUpperCase());
             
             try {
+                if(!supabaseClient) throw new Error("Database connection not ready");
                 const { data, error } = await supabaseClient.from('queues').select('*, order_items(*)').eq('id', qid).single();
 
                 if (error || !data) {
@@ -900,6 +907,7 @@
             errBox.classList.add('hidden');
 
             try {
+                if(!supabaseClient) throw new Error("Database connection not ready");
                 const fileName = `${currentQueue.id}_${Date.now()}.jpg`;
                 const { error: uploadErr } = await supabaseClient.storage.from('slips').upload(fileName, selectedFileBlob, { contentType: 'image/jpeg', upsert: true });
                 if (uploadErr) throw uploadErr;
@@ -1021,6 +1029,7 @@
             if(btn) btn.innerHTML = '<div class="loading-spinner"></div>';
             
             try {
+                if(!supabaseClient) throw new Error("Supabase Client Error");
                 const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session) {
                     const { data: isAdmin } = await supabaseClient.rpc('is_admin');
@@ -1046,6 +1055,7 @@
             const password = document.getElementById('admin-password').value;
 
             try {
+                if(!supabaseClient) throw new Error("Supabase SDK Missing");
                 const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) throw error;
                 
@@ -1079,7 +1089,7 @@
         }
 
         async function logout() {
-            await supabaseClient.auth.signOut();
+            if(supabaseClient) await supabaseClient.auth.signOut();
             if(adminTimer) clearInterval(adminTimer);
             document.getElementById('admin-view').classList.add('hidden');
             document.getElementById('main-view').classList.remove('hidden');
@@ -1100,6 +1110,7 @@
         async function generateSampleData() {
             showCustomConfirm('ยืนยันสร้างข้อมูลตัวอย่าง QR0001-J และ QR0002-J หรือไม่?', async () => {
                 try {
+                    if(!supabaseClient) throw new Error("DB Err");
                     const q1 = { id: 'QR0001-J', job_id: 'JB0001-Q', total: 49.00, status: 'pending', discount: 0, discount_type: 'baht', updated_at: new Date().toISOString() };
                     const items1 = [ { queue_id: 'QR0001-J', name: 'สินค้าตัวอย่าง 1', price: 49.00 } ];
                     
@@ -1144,6 +1155,7 @@
 
         async function loadAdminData() {
             try {
+                if(!supabaseClient) return;
                 const { data: queues, error } = await supabaseClient.from('queues').select('*, order_items(*)').order('created_at', { ascending: false });
                 if (error) throw error;
 
@@ -1227,11 +1239,6 @@
             });
         }
 
-        // ==========================================
-        // ฟอร์มสร้าง/แก้ไขคิว (Admin)
-        // ==========================================
-        let itemsCounter = 0;
-        
         async function generateAutoID() {
             try {
                 const { data } = await supabaseClient.from('queues').select('id, job_id').order('created_at', { ascending: false }).limit(1);
